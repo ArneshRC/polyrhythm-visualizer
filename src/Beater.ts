@@ -6,13 +6,118 @@ import { instrumentNames, AppSettings, BeaterSettings, BeatQueueItem, Instrument
 
 import { sleep } from './utils';
 
+class BeatScheduler {
+
+    private beater: Beater;
+
+    // Each scheduled beat is put into a queue
+    // from which it is consumed during animation
+    private beatQueue: BeatQueueItem[] = [];
+
+    // Time of the next beat
+    private nextBeatTime: number = 0;
+
+    // Number of the next beat (0, 1, ...)
+    private nextBeat: number = 0;
+
+    // How much ahead of time a
+    // new beat is to be scheduled
+    private scheduleAheadTime: number = 0.1;
+
+    constructor(beater: Beater) {
+        this.beater = beater;
+    }
+
+    scheduleBeat(beatNumber: number, time: number) {
+        this.beatQueue.push({ beatNumber, time });
+        this.beater.play(time);
+    }
+
+    incrementBeat() {
+        // 1. Non-zero newBeatCount means the user has requested its change.
+        // 2. beatCount may only be changed on completion of a full measure
+        //    to avoid problems with timing.
+        // 3. The 0th beat signifies the beginning of a new measure,
+        //    hence the check
+        if(this.beater.settings.newBeatCount > 0 && this.nextBeat == 0) {
+            this.beater.settings.currentBeatCount = this.beater.settings.newBeatCount;
+            this.beater.settings.newBeatCount = 0;
+            this.nextBeat = 0;
+        }
+
+        const beatDuration = (
+            this.beater.appSettings.measureDuration /
+            this.beater.settings.currentBeatCount
+        );
+
+        this.nextBeatTime += beatDuration;
+
+        this.nextBeat = (this.nextBeat + 1) % this.beater.settings.currentBeatCount;
+    }
+
+    scheduleNewBeats() {
+
+        // Schedule new beats until the last
+        // scheduled beat is further in the future
+        // than scheduleAheadTime
+        while(
+            this.nextBeatTime < (
+                this.beater.audioContext.currentTime +
+                this.scheduleAheadTime
+            )
+        ) {
+            // If the beater is paused, no need to schedule...
+            if(!this.beater.isPaused)
+                this.scheduleBeat(this.nextBeat, this.nextBeatTime);
+            // ...just increment
+            this.incrementBeat();
+        }
+            
+    }
+
+    newBeatReady() {
+
+        // -1 is arbitrary; beatTime is supposed to hold
+        // the starting time of the upcoming beat
+        let beatTime: number = -1;
+        const currentTime = this.beater.audioContext.currentTime;
+
+        // Until the queue only contains beats beyond currentTime
+        while(this.beatQueue.length > 0 && this.beatQueue[0].time <= currentTime) {
+            // ...update currentBeat...
+            this.beater.currentBeat = this.beatQueue[0].beatNumber;
+            // ...and beatTime...
+            beatTime = this.beatQueue[0].time;
+            // ...and dequeue
+            this.beatQueue.splice(0, 1);
+        }
+
+        // 0.03 has been determined experimentally
+        // to be more than the upper limit of
+        // the margin of error (as in the difference
+        // between current time and scheduled time
+        // has been always found to be less than this)
+        //
+        // However, unless this authenticity of this
+        // value can be verified, it is probably not
+        // a good idea, so...
+        //
+        // @TODO work on a better implementation
+        return currentTime - beatTime < 0.03;
+
+    }
+
+}
+
 class BeatNumberDisplay implements RedomComponent {
 
-    private parent: Beater;
-    el: HTMLElement;
+    public parent: Beater;
+
+    public el: HTMLElement;
 
     constructor(currentBeat: number, parent: Beater) {
         this.el = el('div.beat-number', currentBeat);
+        // 0 signifies the beginning of a new measure
         if(currentBeat == 0)
             this.el.classList.add('major-beat');
         this.parent = parent;
@@ -27,7 +132,7 @@ class BeatNumberDisplay implements RedomComponent {
 
 class BeaterSettingsMenu implements RedomComponent {
 
-    private parent: Beater;
+    public parent: Beater;
     private instrumentInput: HTMLSelectElement;
     private beatCountInput: HTMLInputElement;
 
@@ -49,9 +154,9 @@ class BeaterSettingsMenu implements RedomComponent {
             this.beatCountInput = el('input', {
                 type: 'number',
                 min: 1, max: 10,
-                value: this.parent.newBeatCount != 0
-                    ? this.parent.newBeatCount
-                    : this.parent.settings.beatCount
+                value: this.parent.settings.newBeatCount != 0
+                    ? this.parent.settings.newBeatCount
+                    : this.parent.settings.currentBeatCount
             })
         );
 
@@ -65,7 +170,7 @@ class BeaterSettingsMenu implements RedomComponent {
         });
 
         this.beatCountInput.addEventListener('change', _ev => {
-            this.parent.changeBeatCount(parseInt(this.beatCountInput.value));
+            this.parent.settings.newBeatCount = parseInt(this.beatCountInput.value);
         });
 
     }
@@ -87,23 +192,26 @@ class BeaterSettingsMenu implements RedomComponent {
 export default class Beater implements RedomComponent {
 
     public settings: BeaterSettings = {
-        beatCount: 4,
+        currentBeatCount: 4,
+        newBeatCount: 0,
         instrumentName: 'kick'
     };
 
-    private appSettings: AppSettings;
+    public appSettings: AppSettings;
 
-    private audioContext: AudioContext;
+    public audioContext: AudioContext;
 
     private instrument: Instrument;
 
-    private buttonsContainer: HTMLElement;
+    public buttonsContainer: HTMLElement;
     private playButton: HTMLElement;
     private playButtonIcon: HTMLElement;
     private settingsButton: HTMLElement;
     private settingsIcon: HTMLElement;
     public settingsMenu: BeaterSettingsMenu;
 
+    public currentBeat = -1;
+    public scheduler: BeatScheduler;
 
     public el: HTMLElement;
 
@@ -112,25 +220,20 @@ export default class Beater implements RedomComponent {
     public id: number;
     static newId = 0;
 
-    private beatQueue: BeatQueueItem[] = [];
-    private nextBeatTime: number = 0;
-    private nextBeat: number = 0;
-    private lastBeatDrawn: number = -1;
-    private scheduleAheadTime: number = 0.1;
-    public newBeatCount: number = 0;
-
     constructor(audioContext: AudioContext, appSettings: AppSettings) {
 
         this.audioContext = audioContext;
-
-        this.settings.instrumentName = 'kick';
-        this.instrument = new Kick(this.audioContext);
 
         this.id = Beater.newId++;
 
         this.isPaused = true;
 
+        // Pick default instrument
+        this.changeInstrument();
+
         this.appSettings = appSettings;
+
+        this.scheduler = new BeatScheduler(this);
 
         this.el = el('div.beater',
             this.buttonsContainer = el('div.beater-buttons',
@@ -147,11 +250,14 @@ export default class Beater implements RedomComponent {
         this.el.dataset.id = String(this.id);
         this.el.dataset.paused = String(this.isPaused);
 
-        this.setup();
+        this.setupListeners();
+
+        // Start animation loop
+        requestAnimationFrame( this.animateWhenReady.bind(this) );
 
     }
 
-    setup() {
+    setupListeners() {
 
         this.playButton.addEventListener('click', _ev => {
             this.togglePaused();
@@ -163,7 +269,7 @@ export default class Beater implements RedomComponent {
 
     }
 
-    changeInstrument(instrumentName: InstrumentName) {
+    changeInstrument(instrumentName: InstrumentName = 'kick') {
 
         this.settings.instrumentName = instrumentName;
 
@@ -182,10 +288,6 @@ export default class Beater implements RedomComponent {
 
     }
 
-    changeBeatCount(beatCount: number) {
-        this.newBeatCount = beatCount;
-    }
-
     togglePaused() {
 
         this.isPaused = !this.isPaused;
@@ -198,73 +300,27 @@ export default class Beater implements RedomComponent {
 
     }
     
-    scheduleBeat(beatNumber: number, time: number) {
-        this.beatQueue.push({ beatNumber, time });
+    play(time: number) {
         this.instrument.play(time);
     }
 
-    incrementBeat() {
+    async pulsate(currentBeat: number) {
 
-        if(this.newBeatCount > 0 && this.nextBeat == 0) {
-            this.settings.beatCount = this.newBeatCount;
-            this.newBeatCount = 0;
-            this.nextBeat = 0;
-        }
+        const className = currentBeat == 0
+            ? 'major-beat' : 'minor-beat';
 
-        const beatDuration = this.appSettings.measureDuration / this.settings.beatCount;
-
-        this.nextBeatTime += beatDuration;
-
-        this.nextBeat = (this.nextBeat + 1) % this.settings.beatCount;
-
-    }
-
-    drawFlashes() {
-        let currentBeat = this.lastBeatDrawn;
-        let beatTime;
-        const currentTime = this.audioContext.currentTime;
-
-        while(this.beatQueue.length > 0 && this.beatQueue[0].time < currentTime) {
-            currentBeat = this.beatQueue[0].beatNumber;
-            beatTime = this.beatQueue[0].time;
-            this.beatQueue.splice(0, 1);
-        }
-
-        if(this.lastBeatDrawn != currentBeat || beatTime - currentTime < 0.001) {
-
-            this.flash(currentBeat);
-
-            this.lastBeatDrawn = currentBeat;
-
-        }
-
-        requestAnimationFrame(this.drawFlashes.bind(this));
-
-    }
-
-    async flash(currentBeat: number) {
-
-        this.buttonsContainer.classList.add(
-            currentBeat == 0
-            ? 'major-beat' : 'minor-beat'
-        );
-        mount(this.el, new BeatNumberDisplay(currentBeat, this));
+        this.buttonsContainer.classList.add(className);
         await sleep(100);
-        this.buttonsContainer.classList.remove(
-            currentBeat == 0
-            ? 'major-beat' : 'minor-beat'
-        )
+        this.buttonsContainer.classList.remove(className);
 
     }
 
-    scheduler() {
-
-        while(this.nextBeatTime < this.audioContext.currentTime + this.scheduleAheadTime) {
-            if(!this.isPaused)
-                this.scheduleBeat(this.nextBeat, this.nextBeatTime);
-            this.incrementBeat();
+    animateWhenReady() {
+        if(this.scheduler.newBeatReady()) {
+            this.pulsate(this.currentBeat);
+            mount(this, new BeatNumberDisplay(this.currentBeat, this));
         }
-            
+        requestAnimationFrame(this.animateWhenReady.bind(this));
     }
 
 }

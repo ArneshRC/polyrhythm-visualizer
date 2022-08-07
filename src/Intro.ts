@@ -5,13 +5,13 @@ import { text } from './constants';
 
 export default class Intro implements RedomComponent {
 
-    el: HTMLElement;
+    public el: HTMLElement;
 
     constructor() {
 
         this.el = el('div.intro.main-container',
             el('h1#app-name', text.appName),
-            el('h1#click-to-start', "Click to start"),
+            el('h1#click-to-start', text.clickToStart),
         );
 
         this.el.addEventListener('click', () => {

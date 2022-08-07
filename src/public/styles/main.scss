@@ -6,6 +6,16 @@
 @import './animations.scss';
 @import './general.scss';
 
+@media (max-width: 720px) {
+  div#beaters-container {
+    flex-flow: column wrap;
+  }
+
+  div.beater {
+    margin-bottom: 2em;
+  }
+}
+
 div.intro {
   justify-content: center;
 }
@@ -25,7 +35,7 @@ h1#app-name {
   animation: fly-down 1s ease;
 }
 
-div#beaters-container {
+#beaters-container {
 
   i {
     font-size: 30px;

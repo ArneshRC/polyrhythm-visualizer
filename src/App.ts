@@ -16,12 +16,15 @@ export default class App implements RedomComponent {
     private beaters: Beater[];
     private newBeater: HTMLElement;
 
+    private timerWorker: Worker;
+
     el: HTMLElement;
 
     constructor() {
 
         this.audioContext = new AudioContext();
 
+        // Initializing with 2 beaters
         this.beaters = Array(2)
             .fill(() => this.createBeater())
             .map(f => f());
@@ -36,11 +39,14 @@ export default class App implements RedomComponent {
             )
         );
 
-        this.setup();
+        this.setupListeners();
+        this.setupTimer();
 
     }
 
-    private setup() {
+    setupListeners() {
+
+        // Handle clicks on "new beater" button
         this.newBeater.addEventListener('click', () => {
             const beater = this.createBeater();
             this.beaters.push(beater);
@@ -48,15 +54,49 @@ export default class App implements RedomComponent {
                 this.newBeater.hidden = true;
             mount(this.beatersContainer, beater, this.newBeater);
         });
+
+        // Clicking anywhere in the app...
+        this.el.addEventListener('click', ev => {
+            if(!(ev.target instanceof HTMLElement)
+                // ...except beater settings menu...
+            ||  ev.target.closest('div.beater-settings') != null
+                // ...and beater settings button...
+            ||  ev.target.closest('button.btn-beater-settings') != null
+            ) return;
+
+            // should hide ALL the open settings menus
+            this.beaters.forEach(beater => {
+                if(!beater.settingsMenu.hidden)
+                    beater.settingsMenu.hide()
+            });
+        });
+
     }
 
-    private createBeater() {
-        const beater = new Beater(this.audioContext, this.settings);
-        requestAnimationFrame( beater.drawFlashes.bind(beater) );
-        return beater;
+    setupTimer() {
+
+        // Importing like this enables webpack to deal with it
+        this.timerWorker = new Worker(
+            new URL('./timer.worker.ts', import.meta.url)
+        );
+        
+        this.timerWorker.addEventListener('message', ev => {
+            // If TICK is received from timer
+            if(ev.data == 'tick') {
+                // Call schedulers for all beaters
+                this.beaters.forEach(
+                    beater => beater.scheduler.scheduleNewBeats()
+                );
+            }
+        });
+
     }
 
-    private removeBeater(beaterId: number) {
+    createBeater() {
+        return new Beater(this.audioContext, this.settings);
+    }
+
+    removeBeater(beaterId: number) {
         const beater = this.beaters.splice(
             this.beaters.findIndex(
                 beater => beater.id == beaterId
@@ -67,32 +107,8 @@ export default class App implements RedomComponent {
 
     }
 
-    scheduleBeaters() {
-        this.beaters.forEach(beater => beater.scheduler());
-    }
-
     init() {
-        this.beaters.forEach(beater =>
-            requestAnimationFrame(
-                 beater.drawFlashes.bind(beater)
-            )
-        );
-        const timerWorker = new Worker(
-            new URL('./timer.worker.ts', import.meta.url)
-        );
-        timerWorker.addEventListener('message', ev => {
-            if(ev.data == 'tick') {
-                this.scheduleBeaters();
-            }
-        });
-        this.el.addEventListener('click', ev => {
-            if(!(ev.target instanceof HTMLElement)
-            || ev.target.closest('div.beater-settings') != null
-            || ev.target.closest('button.btn-beater-settings') != null) return;
-
-            this.beaters.forEach(beater => { if(!beater.settingsMenu.hidden) beater.settingsMenu.hide() })
-        });
-        timerWorker.postMessage('start');
+        this.timerWorker.postMessage('start');
         mount(document.body, this)
     }
 

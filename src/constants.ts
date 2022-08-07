@@ -1,5 +1,6 @@
 export const text = {
-    appName: 'Polyrhythm Visualizer'
+    appName: "Polyrhythm Visualizer",
+    clickToStart: "Click to start"
 }
 
 export const instrumentNames = [ 'kick', 'snare', 'sine' ] as const;
@@ -11,8 +12,9 @@ export type AppSettings = {
 }
 
 export type BeaterSettings = {
-    beatCount: number;
+    currentBeatCount: number;
     instrumentName: InstrumentName;
+    newBeatCount: number;
 }
 
 export type BeatQueueItem = {
