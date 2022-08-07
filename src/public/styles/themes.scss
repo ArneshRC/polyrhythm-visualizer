@@ -1,0 +1,24 @@
+@use './colors.scss' as *;
+@use './assets.scss' as *;
+
+$themes: "light", "dark";
+
+@each $theme in $themes {
+  body[data-theme=#{$theme}] {
+    @each $name, $value in map-get($colors, $theme) {
+      --color-#{$name}: #{$value};
+    }
+    @each $name, $value in map-get($assets, $theme) {
+      --asset-#{$name}: url(#{$value});
+    }
+  }
+}
+
+@function color-get($name) {
+  @return var(--color-#{$name});
+}
+
+@function asset-get($name) {
+  @return var(--asset-#{$name});
+}
+

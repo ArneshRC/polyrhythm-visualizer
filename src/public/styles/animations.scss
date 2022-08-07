@@ -1,0 +1,20 @@
+@keyframes zoom-out {
+  0% { transform: scale(2); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes zoom-in {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fly-down {
+  0% { transform: translateY(-500%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0); opacity: 1; }
+  100% { transform: translate(100px, -100px); opacity: 0; }
+}
+
