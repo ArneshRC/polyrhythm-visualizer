@@ -9,7 +9,8 @@ self.addEventListener('message', ev => {
             interval
         );
     } else if(ev.data == "stop") {
-        clearInterval(timerID);
+        if(timerID != null)
+            clearInterval(timerID);
         timerID = null;
     }
 
