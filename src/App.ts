@@ -5,7 +5,7 @@ import { text, AppSettings } from './constants'
 
 export default class App implements RedomComponent {
 
-    private settings: AppSettings = {
+    public settings: AppSettings = {
         measureDuration: 2,
         maxBeaters: 6
     }
@@ -31,7 +31,7 @@ export default class App implements RedomComponent {
 
         this.el = el('div.app.main-container',
             el('h1#app-name', text.appName),
-            this.beatersContainer = el('div#beaters-container',
+            this.beatersContainer = el('div.beaters-container',
                 ...this.beaters,
                 this.newBeater = el('button#new-beater',
                     el('i.mdi.mdi-plus-thick')
@@ -93,7 +93,7 @@ export default class App implements RedomComponent {
     }
 
     createBeater() {
-        return new Beater(this.audioContext, this.settings);
+        return new Beater(this.audioContext, this);
     }
 
     removeBeater(beaterId: number) {
@@ -103,6 +103,8 @@ export default class App implements RedomComponent {
             ), 1
         )[0];
 
+        if(this.beaters.length < this.settings.maxBeaters)
+            this.newBeater.hidden = false;
         unmount(this.beatersContainer, beater);
 
     }

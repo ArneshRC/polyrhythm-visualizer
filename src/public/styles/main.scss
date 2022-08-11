@@ -7,7 +7,7 @@
 @import './general.scss';
 
 @media (max-width: 720px) {
-  div#beaters-container {
+  div.beaters-container {
     flex-flow: column wrap;
   }
 
@@ -35,18 +35,11 @@ h1#app-name {
   animation: fly-down 1s ease;
 }
 
-#beaters-container {
+.beaters-container {
 
   i {
     font-size: 30px;
   }
-
-  display: flex;
-  width: 100%;
-  flex-flow: row wrap;
-  align-items: center;
-  justify-content: space-evenly;
-  margin: 4em 0em;
 
   button {
     width: 50px;
@@ -60,6 +53,12 @@ h1#app-name {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     cursor: pointer;
   }
+  display: flex;
+  width: 100%;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-evenly;
+  margin: 4em 0em;
 
   animation: zoom-in 1s ease;
 
@@ -133,6 +132,14 @@ div.beater-settings {
     border-radius: 10px;
     margin: 5px;
     color: color-get('text') !important;
+    width: 67px;
+  }
+  button.btn-delete-beater {
+    i {
+      font-size: 20px;
+      color: color-get('delete-beater-icon');
+    }
+    background-color: color-get('delete-beater');
   }
   select {
     width: 65px;

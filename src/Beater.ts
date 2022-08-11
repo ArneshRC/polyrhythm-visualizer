@@ -2,9 +2,10 @@ import { el, RedomComponent, setAttr, mount, unmount } from 'redom';
 import { startCase } from 'lodash';
 
 import { Instrument, Kick, Sine, Snare } from './Instrument';
-import { instrumentNames, AppSettings, BeaterSettings, BeatQueueItem, InstrumentName } from './constants'
+import { instrumentNames, BeaterSettings, BeatQueueItem, InstrumentName } from './constants'
 
 import { sleep } from './utils';
+import App from './App';
 
 class BeatScheduler {
 
@@ -46,7 +47,7 @@ class BeatScheduler {
         }
 
         const beatDuration = (
-            this.beater.appSettings.measureDuration /
+            this.beater.parent.settings.measureDuration /
             this.beater.settings.currentBeatCount
         );
 
@@ -116,7 +117,7 @@ class BeatNumberDisplay implements RedomComponent {
     public el: HTMLElement;
 
     constructor(currentBeat: number, parent: Beater) {
-        this.el = el('div.beat-number', currentBeat);
+        this.el = el('div.beat-number', currentBeat + 1);
         // 0 signifies the beginning of a new measure
         if(currentBeat == 0)
             this.el.classList.add('major-beat');
@@ -135,6 +136,7 @@ class BeaterSettingsMenu implements RedomComponent {
     public parent: Beater;
     private instrumentInput: HTMLSelectElement;
     private beatCountInput: HTMLInputElement;
+    private deleteBeater: HTMLButtonElement;
 
     public el: HTMLElement;
 
@@ -157,7 +159,10 @@ class BeaterSettingsMenu implements RedomComponent {
                 value: this.parent.settings.newBeatCount != 0
                     ? this.parent.settings.newBeatCount
                     : this.parent.settings.currentBeatCount
-            })
+            }),
+            this.deleteBeater = el('button.btn-delete-beater', 
+                el('i.mdi.mdi-delete')
+            ) as HTMLButtonElement
         );
 
     }
@@ -171,6 +176,10 @@ class BeaterSettingsMenu implements RedomComponent {
 
         this.beatCountInput.addEventListener('change', _ev => {
             this.parent.settings.newBeatCount = parseInt(this.beatCountInput.value);
+        });
+
+        this.deleteBeater.addEventListener('click', _ev => {
+            this.parent.remove();
         });
 
     }
@@ -197,7 +206,7 @@ export default class Beater implements RedomComponent {
         instrumentName: 'kick'
     };
 
-    public appSettings: AppSettings;
+    public parent: App;
 
     public audioContext: AudioContext;
 
@@ -220,7 +229,7 @@ export default class Beater implements RedomComponent {
     public id: number;
     static newId = 0;
 
-    constructor(audioContext: AudioContext, appSettings: AppSettings) {
+    constructor(audioContext: AudioContext, parent: App) {
 
         this.audioContext = audioContext;
 
@@ -231,7 +240,7 @@ export default class Beater implements RedomComponent {
         // Pick default instrument
         this.changeInstrument();
 
-        this.appSettings = appSettings;
+        this.parent = parent;
 
         this.scheduler = new BeatScheduler(this);
 
@@ -321,6 +330,10 @@ export default class Beater implements RedomComponent {
             mount(this, new BeatNumberDisplay(this.currentBeat, this));
         }
         requestAnimationFrame(this.animateWhenReady.bind(this));
+    }
+
+    remove() {
+        this.parent.removeBeater(this.id);
     }
 
 }

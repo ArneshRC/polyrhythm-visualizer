@@ -50,7 +50,7 @@ export class Snare extends Instrument {
         );
         const output = buffer.getChannelData(0);
 
-        for (var i = 0; i < bufferSize; i++) {
+        for (let i = 0; i < bufferSize; i++) {
             output[i] = Math.random() * 2 - 1;
         }
 
