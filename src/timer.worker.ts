@@ -1,4 +1,4 @@
-let timerID: number = null;
+let timerID: number | null = null;
 let interval = 25;
 
 self.addEventListener('message', ev => {
