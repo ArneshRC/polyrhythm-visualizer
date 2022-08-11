@@ -1,0 +1,1 @@
+(()=>{let e=null;self.addEventListener("message",(t=>{"start"==t.data?e=self.setInterval((()=>postMessage("tick")),25):"stop"==t.data&&(clearInterval(e),e=null)}))})();
