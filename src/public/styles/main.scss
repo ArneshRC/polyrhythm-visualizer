@@ -162,5 +162,6 @@ div.beater-settings {
   box-shadow: 5px 5px 25px rgba(0, 0, 0, 0.2);
   border: 3px solid color-get('beater-settings-border');
   padding: 5px;
+  z-index: 10;
 }
 
