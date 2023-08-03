@@ -9,7 +9,8 @@
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch",
-    "serve": "webpack serve"
+    "serve": "webpack serve",
+    "deploy": "gh-pages -d build"
   },
   "author": "ArneshRC",
   "license": "ISC",
@@ -20,6 +21,7 @@
     "@webpack-cli/generators": "^2.5.0",
     "css-loader": "^6.7.1",
     "eslint": "^8.21.0",
+    "gh-pages": "^5.0.0",
     "html-webpack-plugin": "^5.5.0",
     "prettier": "^2.7.1",
     "sass": "^1.54.0",
