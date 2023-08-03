@@ -23,3 +23,10 @@ div.main-container {
   color: color-get('text');
 }
 
+.hidden {
+  display: none !important;
+}
+
+.hiding {
+  animation: fade-out 0.2s ease !important;
+}

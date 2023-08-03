@@ -178,7 +178,9 @@ class BeaterSettingsMenu implements RedomComponent {
             this.parent.settings.newBeatCount = parseInt(this.beatCountInput.value);
         });
 
-        this.deleteBeater.addEventListener('click', _ev => {
+        this.deleteBeater.addEventListener('click', async _ev => {
+            this.parent.el.classList.add('hiding');
+            await sleep(200);
             this.parent.remove();
         });
 
@@ -192,8 +194,11 @@ class BeaterSettingsMenu implements RedomComponent {
         this.el.classList.remove('hidden');
     }
 
-    hide() {
+    async hide() {
+        this.el.classList.add('hiding');
+        await sleep(200);
         this.el.classList.add('hidden');
+        this.el.classList.remove('hiding');
     }
 
 }
@@ -216,7 +221,6 @@ export default class Beater implements RedomComponent {
     private playButton: HTMLElement;
     private playButtonIcon: HTMLElement;
     private settingsButton: HTMLElement;
-    private settingsIcon: HTMLElement;
     public settingsMenu: BeaterSettingsMenu;
 
     public currentBeat = -1;
@@ -250,7 +254,7 @@ export default class Beater implements RedomComponent {
                     this.playButtonIcon = el('i.mdi.mdi-play')
                 ),
                 this.settingsButton = el('button.btn-beater-settings',
-                    this.settingsIcon = el('i.mdi.mdi-cog')
+                    el('i.mdi.mdi-cog')
                 )
             ),
             this.settingsMenu = new BeaterSettingsMenu(this)

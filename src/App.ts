@@ -2,6 +2,7 @@ import { el, mount, unmount, RedomComponent } from 'redom';
 
 import Beater from './Beater';
 import { text, AppSettings } from './constants'
+import { sleep } from './utils';
 
 export default class App implements RedomComponent {
 
@@ -15,6 +16,7 @@ export default class App implements RedomComponent {
     private beatersContainer: HTMLElement;
     private beaters: Beater[];
     private newBeater: HTMLElement;
+    private newBeaterContainer: HTMLElement;
 
     private timerWorker: Worker;
 
@@ -33,8 +35,10 @@ export default class App implements RedomComponent {
             el('h1#app-name', text.appName),
             this.beatersContainer = el('div.beaters-container',
                 ...this.beaters,
-                this.newBeater = el('button#new-beater',
-                    el('i.mdi.mdi-plus-thick')
+                this.newBeaterContainer = el('div#new-beater-container',
+                    this.newBeater = el('button#new-beater',
+                        el('i.mdi.mdi-plus-thick')
+                    )
                 )
             )
         );
@@ -47,12 +51,16 @@ export default class App implements RedomComponent {
     setupListeners() {
 
         // Handle clicks on "new beater" button
-        this.newBeater.addEventListener('click', () => {
+        this.newBeater.addEventListener('click', async () => {
             const beater = this.createBeater();
             this.beaters.push(beater);
-            if(this.beaters.length >= this.settings.maxBeaters)
-                this.newBeater.hidden = true;
-            mount(this.beatersContainer, beater, this.newBeater);
+            if(this.beaters.length >= this.settings.maxBeaters) {
+                this.newBeaterContainer.classList.add('hiding');
+                await sleep(200);
+                this.newBeaterContainer.classList.remove('hiding');
+                this.newBeaterContainer.classList.add('hidden');
+            }
+            mount(this.beatersContainer, beater, this.newBeaterContainer);
         });
 
         // Clicking anywhere in the app...
@@ -103,8 +111,9 @@ export default class App implements RedomComponent {
             ), 1
         )[0];
 
-        if(this.beaters.length < this.settings.maxBeaters)
-            this.newBeater.hidden = false;
+        if(this.beaters.length < this.settings.maxBeaters) 
+            this.newBeaterContainer.classList.remove('hidden');
+
         unmount(this.beatersContainer, beater);
 
     }
