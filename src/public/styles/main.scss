@@ -6,16 +6,6 @@
 @import './animations.scss';
 @import './general.scss';
 
-@media (max-width: 720px) {
-  div.beaters-container {
-    flex-flow: column wrap;
-  }
-
-  div.beater {
-    margin-bottom: 2em;
-  }
-}
-
 div.intro {
   justify-content: center;
 }
@@ -37,6 +27,8 @@ h1#app-name {
 
 .beaters-container {
 
+  padding: 1em;
+
   i {
     font-size: 30px;
   }
@@ -53,12 +45,15 @@ h1#app-name {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     cursor: pointer;
   }
+
+  box-sizing: border-box;
   display: flex;
   width: 100%;
   flex-flow: row wrap;
   align-items: center;
   justify-content: space-evenly;
   margin: 4em 0em;
+  gap: 2em 1.5em;
 
   animation: zoom-in 1s ease;
 
