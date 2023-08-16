@@ -168,10 +168,46 @@ class Visualizer implements RedomComponent {
         requestAnimationFrame(this.draw.bind(this));
     }
 
+    attachHoverHandler() {
+
+        this.el.addEventListener("mousemove", event => {
+            const w = this.dimensions.width;
+            const h = this.dimensions.height;
+
+            const rect = this.el.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            const cx = w / 2;
+            const cy = h / 2;
+
+            const r = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+
+            let hovering = false;
+
+            for (let idx = 0; idx < this.activeRings.length; idx++) {
+                const rRing =
+                    (Math.min(w, h) * this.activeRings.length) / 16 +
+                    (appSettings.maxRings - idx * 3) * 10;
+                const rRingInner = rRing - this.ringTrackThickness / 2;
+                const rRingOuter = rRing + this.ringTrackThickness / 2;
+
+                if (r >= rRingInner && r <= rRingOuter) {
+                    hovering = true;
+                    this.hoveringRingIdx = idx;
+                }
+            }
+
+            if (!hovering) this.hoveringRingIdx = undefined;
+        });
+
+    }
+
     async init() {
         requestAnimationFrame(this.draw.bind(this));
         this.addRing();
         this.addRing();
+        this.attachHoverHandler();
     }
 }
 
