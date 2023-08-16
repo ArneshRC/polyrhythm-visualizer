@@ -2,6 +2,9 @@ import "./styles/index.css";
 import { RedomComponent, el } from "redom";
 import classNames from "classnames";
 import Visualizer from "./components/Visualizer";
+import Swal from "sweetalert2";
+import colors from "tailwindcss/colors";
+import { audioContext } from "./services/global";
 
 class App implements RedomComponent {
     el: HTMLDivElement;
@@ -39,7 +42,19 @@ class App implements RedomComponent {
         });
         return timerWorker;
     }
-    onmount() {
+
+    async onmount() {
+        await Swal.fire({
+            icon: 'info',
+            title: "Welcome",
+            text: "This is a rewrite of the original app with a completely new vision. Enjoy!",
+            color: colors.neutral[300],
+            background: colors.neutral[900],
+            iconColor: colors.sky[300],
+            confirmButtonColor: colors.blue[500]
+        });
+        if(audioContext.state == 'suspended')
+            audioContext.resume();
         this.timerWorker.postMessage('start');
         this.visualizer.init();
     }

@@ -18,6 +18,9 @@ class BeatScheduler {
     // Number of the current beat (0, 1, ...)
     public currentBeat: number = 0;
 
+    // Time of the current beat
+    public currentBeatTime: number = 0;
+
     // Number of the next beat (0, 1, ...)
     private nextBeat: number = 0;
 
@@ -87,8 +90,12 @@ class BeatScheduler {
         ) {
             // ...update currentBeat...
             this.currentBeat = this.beatQueue[0].beatNumber;
-            // ...and dequeue
+            // ...update beatTime...
+            this.currentBeatTime = this.beatQueue[0].time;
+            // ...dequeue the beat...
             this.beatQueue.splice(0, 1);
+            // ...and update state
+            this.ringState.beatPlayed = false;
         }
     }
 }

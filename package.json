@@ -22,10 +22,12 @@
         "vite": "^4.4.5"
     },
     "dependencies": {
+        "@fontsource/oxanium": "^5.0.8",
         "classnames": "^2.3.2",
         "lodash": "^4.17.21",
         "prettier": "^3.0.2",
         "redom": "^3.29.1",
+        "sweetalert2": "^11.7.23",
         "ts-easing": "^0.2.0"
     }
 }

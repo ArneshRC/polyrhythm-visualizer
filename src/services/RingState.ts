@@ -1,5 +1,6 @@
 interface RingState {
     currentBeatCount: number;
+    beatPlayed: boolean;
     beatCountChanged: boolean;
     paused: boolean;
 }

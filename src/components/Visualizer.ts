@@ -7,16 +7,19 @@ import { ringColors, RingColor } from "../constants";
 import RingState from "../services/RingState";
 import RingSettings from "../services/RingSettings";
 import { appSettings, audioContext } from "../services/global";
+import { Kick } from "../Instrument";
 
 class Ring {
     static globalCount = 0;
 
     public settings: RingSettings = {
         beatCount: 4,
+        instrument: new Kick()
     };
 
     public state: RingState = {
         paused: false,
+        beatPlayed: false,
         beatCountChanged: false,
         currentBeatCount: this.settings.beatCount
     };
@@ -49,6 +52,10 @@ class Ring {
     set beatCount(_beatCount: number) {
         this.settings.beatCount = _beatCount;
         this.state.beatCountChanged = true;
+    }
+
+    play(time?: number) {
+        this.settings.instrument.play(time);
     }
 
     constructor(colorName: RingColor) {
@@ -85,7 +92,9 @@ class Visualizer implements RedomComponent {
                 uniq(this.activeRings.map(ring => ring.colorName))
             )
         )!;
-        this.activeRings.push(new Ring(colorName));
+        const ring = new Ring(colorName);
+        this.activeRings.push(ring);
+        return ring;
     }
 
     removeRing(id: number) {
@@ -120,11 +129,24 @@ class Visualizer implements RedomComponent {
                     ctx.moveTo(cxi, cyi);
 
                     ring.scheduler.updateCurrentBeat()
-                    const beaterRadius = ring.scheduler.currentBeat == i ? 10 : 5;
 
-                    ctx.arc(cxi, cyi, beaterRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = colors.neutral[200];
-                    ctx.fill();
+                    if(ring.scheduler.currentBeat == i) {
+                        ctx.fillStyle = colors[ring.colorName][200];
+                        ctx.arc(cxi, cyi, 10, 0, 2 * Math.PI);
+                        ctx.fill();
+                        ctx.fillStyle = colors[ring.colorName][900];
+                        ctx.font = '15px sans-serif';
+                        ctx.fillText(`${i + 1}`, cxi - 4.5, cyi + 5);
+                        if(!ring.state.beatPlayed) {
+                            ring.play();
+                            ring.state.beatPlayed = true;
+                        }
+                    } else {
+                        ctx.fillStyle = colors[ring.colorName][200];
+                        ctx.arc(cxi, cyi, 5, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+
                     ctx.closePath();
                 }
             }
@@ -205,9 +227,16 @@ class Visualizer implements RedomComponent {
 
     async init() {
         requestAnimationFrame(this.draw.bind(this));
-        this.addRing();
-        this.addRing();
+        const ring1 = this.addRing();
+        const ring2 = this.addRing();
+        ring1!.beatCount = 3;
+        ring2!.beatCount = 2;
         this.attachHoverHandler();
+
+        (window as any).rings = {
+            add: () => this.addRing(),
+            all: this.activeRings
+        }
     }
 }
 
