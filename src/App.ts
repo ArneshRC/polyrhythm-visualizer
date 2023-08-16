@@ -6,7 +6,6 @@ import Visualizer from "./components/Visualizer";
 class App implements RedomComponent {
     el: HTMLDivElement;
     private classes = {
-        img: classNames(["logo", "vanilla"]),
         heading: classNames([
             "text-5xl",
             "mt-8"
