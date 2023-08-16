@@ -2,7 +2,10 @@
 export default {
     content: ["./index.html", "./src/**/*.{js,ts}"],
     theme: {
-        extend: {}
+        extend: {},
+        fontFamily: {
+            display: ["Oxanium"]
+        }
     },
     plugins: []
 };

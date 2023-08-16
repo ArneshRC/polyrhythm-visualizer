@@ -9,10 +9,7 @@ import { audioContext } from "./services/global";
 class App implements RedomComponent {
     el: HTMLDivElement;
     private classes = {
-        heading: classNames([
-            "text-5xl",
-            "mt-8"
-        ]),
+        heading: classNames(["text-5xl", "mt-8", "font-display"]),
         container: classNames([
             "flex",
             "flex-col",
@@ -26,7 +23,9 @@ class App implements RedomComponent {
         this.el = el(
             "div",
             [
-                el("h1", "Polyrhythm Visualizer", { className: this.classes.heading }),
+                el("h1", "Polyrhythm Visualizer", {
+                    className: this.classes.heading
+                }),
                 (this.visualizer = new Visualizer())
             ],
             { className: this.classes.container }
@@ -34,9 +33,11 @@ class App implements RedomComponent {
         this.timerWorker = this.setupTimer();
     }
     setupTimer() {
-        const timerWorker = new Worker(new URL('./workers/timer.worker.ts', import.meta.url))
-        timerWorker.addEventListener('message', _event => {
-            for(const ring of this.visualizer.activeRings) {
+        const timerWorker = new Worker(
+            new URL("./workers/timer.worker.ts", import.meta.url)
+        );
+        timerWorker.addEventListener("message", _event => {
+            for (const ring of this.visualizer.activeRings) {
                 ring.scheduler.scheduleNewBeats();
             }
         });
@@ -45,7 +46,7 @@ class App implements RedomComponent {
 
     async onmount() {
         await Swal.fire({
-            icon: 'info',
+            icon: "info",
             title: "Welcome",
             text: "This is a rewrite of the original app with a completely new vision. Enjoy!",
             color: colors.neutral[300],
@@ -53,9 +54,8 @@ class App implements RedomComponent {
             iconColor: colors.sky[300],
             confirmButtonColor: colors.blue[500]
         });
-        if(audioContext.state == 'suspended')
-            audioContext.resume();
-        this.timerWorker.postMessage('start');
+        if (audioContext.state == "suspended") audioContext.resume();
+        this.timerWorker.postMessage("start");
         this.visualizer.init();
     }
 }

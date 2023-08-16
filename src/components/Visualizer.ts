@@ -108,7 +108,6 @@ class Visualizer implements RedomComponent {
         const ctx = this.el.getContext("2d")!;
 
         const drawRing = async (ring: Ring, angle: number) => {
-
             const idx = indexOf(this.activeRings, ring);
 
             const cx = w / 2;
@@ -121,23 +120,23 @@ class Visualizer implements RedomComponent {
             const drawBeaters = () => {
                 const beatCount = ring.beatCount;
 
-                for(let i = 0; i < beatCount; i++) {
-                    const angle = i * 2 * Math.PI / beatCount;
+                for (let i = 0; i < beatCount; i++) {
+                    const angle = (i * 2 * Math.PI) / beatCount;
                     const cxi = cx + r * Math.sin(angle);
                     const cyi = cy - r * Math.cos(angle);
                     ctx.beginPath();
                     ctx.moveTo(cxi, cyi);
 
-                    ring.scheduler.updateCurrentBeat()
+                    ring.scheduler.updateCurrentBeat();
 
-                    if(ring.scheduler.currentBeat == i) {
+                    if (ring.scheduler.currentBeat == i) {
                         ctx.fillStyle = colors[ring.colorName][200];
                         ctx.arc(cxi, cyi, 10, 0, 2 * Math.PI);
                         ctx.fill();
                         ctx.fillStyle = colors[ring.colorName][900];
-                        ctx.font = '15px sans-serif';
+                        ctx.font = "15px sans-serif";
                         ctx.fillText(`${i + 1}`, cxi - 4.5, cyi + 5);
-                        if(!ring.state.beatPlayed) {
+                        if (!ring.state.beatPlayed) {
                             ring.play();
                             ring.state.beatPlayed = true;
                         }
@@ -149,7 +148,7 @@ class Visualizer implements RedomComponent {
 
                     ctx.closePath();
                 }
-            }
+            };
 
             ctx.beginPath();
             ctx.arc(cx, cy, r, 0, 2 * Math.PI);
@@ -172,7 +171,6 @@ class Visualizer implements RedomComponent {
             ctx.closePath();
 
             drawBeaters();
-
         };
 
         this.animation.progress =
@@ -191,7 +189,6 @@ class Visualizer implements RedomComponent {
     }
 
     attachHoverHandler() {
-
         this.el.addEventListener("mousemove", event => {
             const w = this.dimensions.width;
             const h = this.dimensions.height;
@@ -222,7 +219,6 @@ class Visualizer implements RedomComponent {
 
             if (!hovering) this.hoveringRingIdx = undefined;
         });
-
     }
 
     async init() {
@@ -232,11 +228,6 @@ class Visualizer implements RedomComponent {
         ring1!.beatCount = 3;
         ring2!.beatCount = 2;
         this.attachHoverHandler();
-
-        (window as any).rings = {
-            add: () => this.addRing(),
-            all: this.activeRings
-        }
     }
 }
 

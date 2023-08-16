@@ -1,14 +1,14 @@
 module.exports = {
-    extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
+    extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
     env: {
         browser: true,
         node: true,
         es2021: true
     },
-    parser: '@typescript-eslint/parser',
+    parser: "@typescript-eslint/parser",
     parserOptions: {
         ecmaVersion: "latest",
-        sourceType: "module",
+        sourceType: "module"
     },
     root: true,
     plugins: ["@typescript-eslint"],

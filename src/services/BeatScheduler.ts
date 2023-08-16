@@ -50,8 +50,8 @@ class BeatScheduler {
         // 3. The 0th beat signifies the beginning of a new measure,
         //    hence the check
         if (this.ringState.beatCountChanged && this.nextBeat == 0) {
-            this.ringState.currentBeatCount = this.ringSettings.beatCount,
-            this.ringState.beatCountChanged = false;
+            (this.ringState.currentBeatCount = this.ringSettings.beatCount),
+                (this.ringState.beatCountChanged = false);
             this.nextBeat = 0;
         }
 
@@ -60,8 +60,7 @@ class BeatScheduler {
 
         this.nextBeatTime += beatDuration;
 
-        this.nextBeat =
-            (this.nextBeat + 1) % this.ringState.currentBeatCount;
+        this.nextBeat = (this.nextBeat + 1) % this.ringState.currentBeatCount;
     }
 
     scheduleNewBeats() {
