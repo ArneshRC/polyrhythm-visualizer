@@ -18,7 +18,7 @@ class Ring {
     };
 
     public state: RingState = {
-        paused: false,
+        paused: true,
         beatPlayed: false,
         beatCountChanged: false,
         currentBeatCount: this.settings.beatCount
@@ -80,6 +80,10 @@ class Visualizer implements RedomComponent {
         done: false
     };
 
+    private ringClickHandler: (idx: number, x: number, y: number) => void =
+        _idx => {};
+    private outsideClickHandler: () => void = () => {};
+
     constructor() {
         this.el = el("canvas", { id: "visualizer", ...this.dimensions });
     }
@@ -129,7 +133,7 @@ class Visualizer implements RedomComponent {
 
                     ring.scheduler.updateCurrentBeat();
 
-                    if (ring.scheduler.currentBeat == i) {
+                    if (!ring.state.paused && ring.scheduler.currentBeat == i) {
                         ctx.fillStyle = colors[ring.colorName][200];
                         ctx.arc(cxi, cyi, 10, 0, 2 * Math.PI);
                         ctx.fill();
@@ -182,7 +186,10 @@ class Visualizer implements RedomComponent {
         const angle = -0.5 * Math.PI + this.animation.progress * 2 * Math.PI;
 
         for (let idx = 0; idx < this.activeRings.length; idx++) {
-            drawRing(this.activeRings[idx], angle);
+            drawRing(
+                this.activeRings[idx],
+                this.activeRings[idx].state.paused ? -Math.PI / 2 : angle
+            );
         }
 
         requestAnimationFrame(this.draw.bind(this));
@@ -217,8 +224,59 @@ class Visualizer implements RedomComponent {
                 }
             }
 
-            if (!hovering) this.hoveringRingIdx = undefined;
+            if (hovering) {
+                this.el.style.cursor = "pointer";
+            } else {
+                this.el.style.cursor = "default";
+                this.hoveringRingIdx = undefined;
+            }
         });
+    }
+
+    attachClickHandler() {
+        this.el.addEventListener("click", event => {
+            const w = this.dimensions.width;
+            const h = this.dimensions.height;
+
+            const rect = this.el.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            const cx = w / 2;
+            const cy = h / 2;
+
+            const r = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+
+            let clickedRingIdx: number | null = null;
+
+            for (let idx = 0; idx < this.activeRings.length; idx++) {
+                const rRing =
+                    (Math.min(w, h) * this.activeRings.length) / 16 +
+                    (appSettings.maxRings - idx * 3) * 10;
+                const rRingInner = rRing - this.ringTrackThickness / 2;
+                const rRingOuter = rRing + this.ringTrackThickness / 2;
+
+                if (r >= rRingInner && r <= rRingOuter) {
+                    clickedRingIdx = idx;
+                }
+            }
+
+            if (clickedRingIdx == null) {
+                this.outsideClickHandler();
+            } else {
+                this.ringClickHandler(clickedRingIdx, cx - x, cy - y);
+            }
+        });
+    }
+
+    set onRingClick(
+        ringClickHandler: (idx: number, x: number, y: number) => void
+    ) {
+        this.ringClickHandler = ringClickHandler;
+    }
+
+    set onOutsideClick(outsideClickHandler: () => void) {
+        this.outsideClickHandler = outsideClickHandler;
     }
 
     async init() {
@@ -228,10 +286,11 @@ class Visualizer implements RedomComponent {
         ring1!.beatCount = 3;
         ring2!.beatCount = 2;
         this.attachHoverHandler();
+        this.attachClickHandler();
         (window as any).rings = {
             add: () => this.addRing(),
             all: this.activeRings
-        }
+        };
     }
 }
 

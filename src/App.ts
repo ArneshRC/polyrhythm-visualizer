@@ -1,11 +1,12 @@
-import "./styles/index.css";
-import { RedomComponent, el } from "redom";
+import { RedomComponent, el, mount, unmount } from "redom";
 import classNames from "classnames";
-import Visualizer from "./components/Visualizer";
 import Swal from "sweetalert2";
 import colors from "tailwindcss/colors";
+
 import { audioContext } from "./services/global";
+import Visualizer from "./components/Visualizer";
 import RingAdder from "./components/RingAdder";
+import RingSettingsMenu from "./components/RingSettingsMenu";
 
 class App implements RedomComponent {
     el: HTMLDivElement;
@@ -17,14 +18,14 @@ class App implements RedomComponent {
             "justify-center",
             "items-center"
         ]),
-        visualizerContainer: classNames([
-            'relative'
-        ])
+        visualizerContainer: classNames(["relative"])
     };
     timerWorker: Worker;
 
+    visualizerContainer: HTMLDivElement;
     visualizer: Visualizer;
     ringAdder: RingAdder;
+    currentRingSettingsMenu: RingSettingsMenu | null = null;
     constructor() {
         this.el = el(
             "div",
@@ -32,22 +33,56 @@ class App implements RedomComponent {
                 el("h1", "Polyrhythm Visualizer", {
                     className: this.classes.heading
                 }),
-                el('div', [
-                    (this.visualizer = new Visualizer()),
-                    (this.ringAdder = new RingAdder())
-                ], { className: this.classes.visualizerContainer })
+                (this.visualizerContainer = el(
+                    "div",
+                    [
+                        (this.visualizer = new Visualizer()),
+                        (this.ringAdder = new RingAdder())
+                    ],
+                    { className: this.classes.visualizerContainer }
+                ))
             ],
             { className: this.classes.container }
         );
         this.timerWorker = this.setupTimer();
     }
+
+    async closeSettingsMenu() {
+        if (this.currentRingSettingsMenu == null) return;
+        await this.currentRingSettingsMenu.animateClose();
+        unmount(this.visualizerContainer, this.currentRingSettingsMenu);
+        this.currentRingSettingsMenu = null;
+    }
+
+    async openSettingsMenu(ringIdx: number, x: number, y: number) {
+        await this.closeSettingsMenu();
+        const ring = this.visualizer.activeRings[ringIdx];
+        const ringId = ring.id;
+        this.currentRingSettingsMenu = new RingSettingsMenu(
+            ringId,
+            ring.state,
+            ring.settings,
+            { x, y }
+        );
+        this.currentRingSettingsMenu.onBeatCountChange = newBeatCount => {
+            ring.beatCount = newBeatCount;
+        };
+        this.currentRingSettingsMenu.onRingRemove = () => {
+            this.visualizer.removeRing(ringId);
+            this.closeSettingsMenu();
+        };
+        mount(this.visualizerContainer, this.currentRingSettingsMenu);
+    }
+
     setupTimer() {
         const timerWorker = new Worker(
             new URL("./workers/timer.worker.ts", import.meta.url)
         );
-        timerWorker.addEventListener("message", _event => {
-            for (const ring of this.visualizer.activeRings) {
-                ring.scheduler.scheduleNewBeats();
+        timerWorker.addEventListener("message", event => {
+            if (event.data == "tick") {
+                for (const ring of this.visualizer.activeRings) {
+                    ring.scheduler.scheduleNewBeats();
+                }
             }
         });
         return timerWorker;
@@ -68,7 +103,24 @@ class App implements RedomComponent {
         this.visualizer.init();
         this.ringAdder.onClick = () => {
             this.visualizer.addRing();
-        }
+        };
+        this.visualizer.onRingClick = (idx, x, y) => {
+            this.openSettingsMenu(idx, x, y);
+        };
+        this.visualizer.onOutsideClick = () => {
+            this.closeSettingsMenu();
+        };
+        document.addEventListener("click", event => {
+            event.stopPropagation();
+            if (
+                this.currentRingSettingsMenu != null &&
+                event.target instanceof Element &&
+                document.body.contains(event.target) &&
+                !this.currentRingSettingsMenu.el.contains(event.target) &&
+                !this.visualizerContainer.contains(event.target)
+            )
+                this.closeSettingsMenu();
+        });
     }
 }
 
