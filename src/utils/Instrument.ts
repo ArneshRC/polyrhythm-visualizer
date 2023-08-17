@@ -1,4 +1,4 @@
-import { audioContext } from "./services/global";
+import { audioContext } from "../services/global";
 
 export abstract class Instrument {
     abstract play(time?: number): void;

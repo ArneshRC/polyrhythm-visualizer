@@ -1,5 +1,4 @@
-import RingSettings from "./RingSettings";
-import RingState from "./RingState";
+import { RingSettings, RingState } from "../utils/Ring";
 import { appSettings, audioContext } from "./global";
 
 interface BeatQueueItem {
@@ -8,30 +7,46 @@ interface BeatQueueItem {
 }
 
 class BeatScheduler {
-    // Each scheduled beat is put into this queue
-    // from where it is consumed during animation
+    /**
+     * Each scheduled beat is put into this queue
+     * from where it is consumed during animation
+     */
     private beatQueue: BeatQueueItem[] = [];
 
-    // Time of the next beat
+    /**
+     * Time of the next beat
+     */
     private nextBeatTime: number = 0;
 
-    // Number of the current beat (0, 1, ...)
+    /**
+     * Number of the current beat (0, 1, ...)
+     */
     public currentBeat: number = 0;
 
-    // Time of the current beat
+    /**
+     * Time of the current beat
+     */
     public currentBeatTime: number = 0;
 
-    // Number of the next beat (0, 1, ...)
+    /**
+     * Number of the next beat (0, 1, ...)
+     */
     private nextBeat: number = 0;
 
-    // State of the associated ring
+    /**
+     * State of the associated ring
+     */
     private ringState: RingState;
 
-    // Settings of the associated ring
+    /**
+     * Settings of the associated ring
+     */
     private ringSettings: RingSettings;
 
-    // How much ahead of time a
-    // new beat is to be scheduled
+    /**
+     * How much ahead of time a
+     * new beat is to be scheduled
+     */
     private scheduleAheadTime: number = 0.1;
 
     constructor(ringState: RingState, ringSettings: RingSettings) {
@@ -39,10 +54,16 @@ class BeatScheduler {
         this.ringSettings = ringSettings;
     }
 
+    /**
+     * Push beat to the beat queue
+     */
     scheduleBeat(beatNumber: number, time: number) {
         this.beatQueue.push({ beatNumber, time });
     }
 
+    /**
+     * Set the next beat
+     */
     incrementBeat() {
         // 1. beatCountChanged means the user has requested its change.
         // 2. beatCount may only be changed on completion of a full measure
@@ -63,6 +84,9 @@ class BeatScheduler {
         this.nextBeat = (this.nextBeat + 1) % this.ringState.currentBeatCount;
     }
 
+    /**
+     * Schedule new beats
+     */
     scheduleNewBeats() {
         // Schedule new beats until the last
         // scheduled beat is further in the future
@@ -79,6 +103,10 @@ class BeatScheduler {
         }
     }
 
+    /**
+     * Consume beats from the beat queue
+     * and update currentBeat
+     */
     updateCurrentBeat() {
         const currentTime = audioContext.currentTime;
 

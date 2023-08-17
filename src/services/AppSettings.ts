@@ -1,7 +1,11 @@
 interface AppSettings {
-    // Duration of a measure in seconds
+    /**
+     * Duration of a measure in seconds
+     */
     measureDuration: number;
-    // Maximum number of rings
+    /**
+     * Maximum number of rings
+     */
     maxRings: number;
 }
 

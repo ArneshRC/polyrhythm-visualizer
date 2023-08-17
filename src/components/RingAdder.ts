@@ -29,11 +29,20 @@ class RingAdder implements RedomComponent {
             ]);
         }
     })();
+
     el = el("button", new Icon(mdiPlus, colors.neutral[400]), {
         className: this.classes.plus
     });
+
+    constructor() {
+        this.el.addEventListener("click", () => {
+            this.clickHandler();
+        });
+    }
+
+    clickHandler: () => void = () => {};
     set onClick(clickHandler: () => void) {
-        this.el.addEventListener("click", clickHandler);
+        this.clickHandler = clickHandler;
     }
 }
 

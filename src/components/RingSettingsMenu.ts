@@ -1,5 +1,6 @@
 import { RedomComponent, el, setAttr, setChildren } from "redom";
 import classNames from "classnames";
+import { inRange } from "lodash";
 import {
     mdiPlay,
     mdiPause,
@@ -7,14 +8,14 @@ import {
     mdiChevronUp,
     mdiChevronDown
 } from "@mdi/js";
-import { inRange } from "lodash";
 
-import RingSettings from "../services/RingSettings";
-import RingState from "../services/RingState";
+import { RingSettings, RingState } from "../utils/Ring";
 import Icon from "./Icon";
 import { Coords } from "../constants";
 
 class RingSettingsMenu implements RedomComponent {
+    el: HTMLDivElement;
+
     private classes = new (class {
         #button = [
             "rounded-md",
@@ -72,19 +73,19 @@ class RingSettingsMenu implements RedomComponent {
         }
     })();
 
+    // Properties
     ringId: number;
     ringSettings: RingSettings;
     ringState: RingState;
     position: Coords;
 
-    playPause: HTMLButtonElement;
+    // Components
+    playPauseButton: HTMLButtonElement;
     buttonsContainer: HTMLDivElement;
-    delete: HTMLButtonElement;
+    deleteButton: HTMLButtonElement;
     beatCountInput: HTMLInputElement;
-    moveUp: HTMLButtonElement;
-    moveDown: HTMLButtonElement;
-
-    el: HTMLDivElement;
+    moveUpButton: HTMLButtonElement;
+    moveDownButton: HTMLButtonElement;
 
     constructor(
         ringId: number,
@@ -98,32 +99,41 @@ class RingSettingsMenu implements RedomComponent {
         this.position = position;
 
         const paused = this.ringState.paused;
-        this.playPause = el(
+
+        // Play/pause button
+        this.playPauseButton = el(
             "button",
+            // Set icon based on whether the ring is playing or not
             paused ? [new Icon(mdiPlay)] : [new Icon(mdiPause)],
             {
                 className: this.classes.getPlayPause(paused)
             }
         );
-        this.delete = el("button", [new Icon(mdiDelete)], {
+
+        // Delete button
+        this.deleteButton = el("button", [new Icon(mdiDelete)], {
             className: this.classes.delete
         });
 
-        this.moveUp = el("button", [new Icon(mdiChevronUp)], {
+        // Reorder buttons
+        this.moveUpButton = el("button", [new Icon(mdiChevronUp)], {
             className: this.classes.reorderButton
         });
-        this.moveDown = el("button", [new Icon(mdiChevronDown)], {
+        this.moveDownButton = el("button", [new Icon(mdiChevronDown)], {
             className: this.classes.reorderButton
         });
 
+        // Grid container for buttons
         this.buttonsContainer = el(
             "div",
-            [this.playPause, this.delete, this.moveUp, this.moveDown],
+            [this.playPauseButton, this.deleteButton, this.moveUpButton, this.moveDownButton],
             {
                 className: this.classes.buttonsContainer
             }
         );
 
+        // Beat count input
+        // @TODO Change to +/- buttons
         this.beatCountInput = el("input", {
             className: this.classes.beatCountInput,
             value: this.ringState.currentBeatCount,
@@ -145,45 +155,71 @@ class RingSettingsMenu implements RedomComponent {
             }
         );
 
+        // Set the position of the menu
+        // according to click position
         this.el.setAttribute(
             "style",
             `top: calc(50% - (${position.y}px)); left: calc(50% - (${position.x}px));`
         );
     }
+
+    /**
+     * Set up event handlers
+     */
     setupHandlers() {
-        this.playPause.addEventListener("click", () => {
+        
+        // When the play/pause button is clicked
+        this.playPauseButton.addEventListener("click", () => {
             let paused = this.ringState.paused;
+            // Toggle paused state
             paused = !paused;
+            // Set new paused state
             this.ringState.paused = paused;
+            // Change classes
             setAttr(
-                this.playPause,
+                this.playPauseButton,
                 "className",
                 this.classes.getPlayPause(paused)
             );
+            // Change icon
             setChildren(
-                this.playPause,
+                this.playPauseButton,
                 paused ? [new Icon(mdiPlay)] : [new Icon(mdiPause)]
             );
         });
 
-        this.delete.addEventListener("click", () => {
+        // When the delete button is clicked
+        this.deleteButton.addEventListener("click", () => {
+            // Invoke the ring remove handler
             this.ringRemoveHandler();
         });
 
+        // When the beatCountInput is updated
         this.beatCountInput.addEventListener("input", () => {
+            // Parse the value
             const newBeatCount = parseInt(this.beatCountInput.value);
+            // Check if the value is in range
             if (!inRange(newBeatCount, 1, 9)) return;
+            // Invoke the beat count change handler
             this.beatCountChangeHandler(newBeatCount);
         });
 
-        this.moveUp.addEventListener("click", () => {
+        // When the move up button is clicked
+        this.moveUpButton.addEventListener("click", () => {
+            // Invoke the ring reorder handler with moveUp: true
             this.ringReorderHandler(true);
         });
 
-        this.moveDown.addEventListener("click", () => {
+        // When the move down button is clicked
+        this.moveDownButton.addEventListener("click", () => {
+            // Invoke the ring reorder handler with moveUp: false
             this.ringReorderHandler(false);
         });
     }
+
+    /**
+     * @TODO Animate when the menu is closed
+     */
     async animateClose() {}
 
     private ringRemoveHandler: () => void = () => {};

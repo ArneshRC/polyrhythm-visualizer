@@ -1,4 +1,4 @@
-export const ringColors = [
+const ringColors = [
     "blue",
     "red",
     "yellow",
@@ -6,9 +6,12 @@ export const ringColors = [
     "purple",
     "sky"
 ] as const;
-export type RingColor = (typeof ringColors)[number];
+type RingColor = (typeof ringColors)[number];
 
-export interface Coords {
+interface Coords {
     x: number;
     y: number;
 }
+
+export { ringColors };
+export type { RingColor, Coords };
