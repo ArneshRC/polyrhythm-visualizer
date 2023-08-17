@@ -10,16 +10,16 @@ import RingSettingsMenu from "./components/RingSettingsMenu";
 
 class App implements RedomComponent {
     el: HTMLDivElement;
-    private classes = {
-        heading: classNames(["text-5xl", "mt-8", "font-display"]),
-        container: classNames([
+    private classes = new (class {
+        heading = classNames(["text-5xl", "mt-8", "font-display"]);
+        container = classNames([
             "flex",
             "flex-col",
             "justify-center",
             "items-center"
-        ]),
-        visualizerContainer: classNames(["relative"])
-    };
+        ]);
+        visualizerContainer = classNames(["relative"]);
+    })();
     timerWorker: Worker;
 
     visualizerContainer: HTMLDivElement;

@@ -5,8 +5,8 @@ import { mdiPlus } from "@mdi/js";
 import colors from "tailwindcss/colors";
 
 class RingAdder implements RedomComponent {
-    private classes = {
-        plus: classNames([
+    private classes = new (class {
+        plus = classNames([
             "w-10",
             "h-10",
             "absolute",
@@ -25,8 +25,8 @@ class RingAdder implements RedomComponent {
             "justify-center",
             "hover:bg-neutral-600",
             "transition-all"
-        ])
-    };
+        ]);
+    })();
     el = el("button", new Icon(mdiPlus, colors.neutral[400]), {
         className: this.classes.plus
     });

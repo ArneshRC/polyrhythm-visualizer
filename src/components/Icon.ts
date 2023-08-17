@@ -3,9 +3,9 @@ import { RedomComponent, svg } from "redom";
 import colors from "tailwindcss/colors";
 
 class Icon implements RedomComponent {
-    private classes = {
-        svg: classNames(["m-1"])
-    };
+    private classes = new (class {
+        svg = classNames(["m-1"]);
+    })();
     el: SVGElement;
     constructor(iconPath: string, color?: string) {
         this.el = svg(
