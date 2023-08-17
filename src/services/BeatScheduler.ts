@@ -71,7 +71,7 @@ class BeatScheduler {
             this.nextBeatTime <
             audioContext.currentTime + this.scheduleAheadTime
         ) {
-            // If the beater is paused, no need to schedule...
+            // If the ring is paused, no need to schedule...
             if (!this.ringState.paused)
                 this.scheduleBeat(this.nextBeat, this.nextBeatTime);
             // ...just increment
