@@ -13,7 +13,12 @@ import { swap } from "./utils";
 class App implements RedomComponent {
     el: HTMLDivElement;
     private classes = new (class {
-        heading = classNames(["text-5xl", "mt-8", "font-display"]);
+        heading = classNames([
+            "text-5xl",
+            "my-8",
+            "font-display",
+            "text-center"
+        ]);
         container = classNames([
             "flex",
             "flex-col",
@@ -81,11 +86,7 @@ class App implements RedomComponent {
                 (!moveUp && ringIdx == 0)
             )
                 return;
-            swap(
-                activeRings,
-                ringIdx,
-                moveUp ? ringIdx + 1 : ringIdx - 1
-            );
+            swap(activeRings, ringIdx, moveUp ? ringIdx + 1 : ringIdx - 1);
         };
         mount(this.visualizerContainer, this.currentRingSettingsMenu);
     }

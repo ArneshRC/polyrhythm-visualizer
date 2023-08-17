@@ -1,4 +1,4 @@
-import { RedomComponent, el } from "redom";
+import { RedomComponent, el, setAttr } from "redom";
 import colors from "tailwindcss/colors";
 import { difference, indexOf, remove, sample, uniq } from "lodash";
 
@@ -65,14 +65,28 @@ class Ring {
 
 class Visualizer implements RedomComponent {
     el: HTMLCanvasElement;
-    dimensions = {
-        width: 480,
-        height: 480
-    };
+    dimensions = new (class {
+        size = 400;
+        get width() {
+            return this.size;
+        }
+        get height() {
+            return this.size;
+        }
+        get unit() {
+            return Math.min(this.width, this.height) / 400;
+        }
+    })();
     activeRings: Ring[] = [];
-    ringThickness = 10;
-    ringTrackThickness = 15;
-    ringGlowStrength = 10;
+    get ringThickness() {
+        return 10 * this.dimensions.unit;
+    }
+    get ringTrackThickness() {
+        return 15 * this.dimensions.unit;
+    }
+    get ringGlowStrength() {
+        return 10 * this.dimensions.unit;
+    }
     hoveringRingIdx?: number = undefined;
     animation = {
         progress: 0,
@@ -81,7 +95,7 @@ class Visualizer implements RedomComponent {
     };
 
     getRingRadius(ringIdx: number) {
-        return (ringIdx/2 + 1) * 60;
+        return (ringIdx / 2 + 1) * 60 * this.dimensions.unit;
     }
 
     private ringClickHandler: (idx: number, x: number, y: number) => void =
@@ -89,7 +103,21 @@ class Visualizer implements RedomComponent {
     private outsideClickHandler: () => void = () => {};
 
     constructor() {
-        this.el = el("canvas", { id: "visualizer", ...this.dimensions });
+        this.el = el("canvas", {
+            id: "visualizer",
+            width: this.dimensions.width,
+            height: this.dimensions.height
+        });
+        window.addEventListener("resize", () => {
+            const w = document.documentElement.clientWidth - 10;
+            if ((w >= 400 && this.dimensions.width < 400) || w < 400) {
+                this.dimensions.size = Math.min(w, 400);
+                setAttr(this, {
+                    width: this.dimensions.width,
+                    height: this.dimensions.height
+                });
+            }
+        });
     }
 
     addRing(colorName?: RingColor) {
@@ -137,7 +165,8 @@ class Visualizer implements RedomComponent {
 
                     if (!ring.state.paused && ring.scheduler.currentBeat == i) {
                         ctx.fillStyle = colors[ring.colorName][200];
-                        ctx.arc(cxi, cyi, 10, 0, 2 * Math.PI);
+                        const beaterRadius = 10 * this.dimensions.unit;
+                        ctx.arc(cxi, cyi, beaterRadius, 0, 2 * Math.PI);
                         ctx.fill();
                         ctx.fillStyle = colors[ring.colorName][900];
                         ctx.font = "15px sans-serif";
@@ -147,8 +176,9 @@ class Visualizer implements RedomComponent {
                             ring.state.beatPlayed = true;
                         }
                     } else {
+                        const beaterRadius = 5 * this.dimensions.unit;
                         ctx.fillStyle = colors[ring.colorName][200];
-                        ctx.arc(cxi, cyi, 5, 0, 2 * Math.PI);
+                        ctx.arc(cxi, cyi, beaterRadius, 0, 2 * Math.PI);
                         ctx.fill();
                     }
 
