@@ -13,19 +13,25 @@ import { swap } from "./utils";
 class App implements RedomComponent {
     el: HTMLDivElement;
     private classes = new (class {
-        heading = classNames([
-            "text-5xl",
-            "my-8",
-            "font-display",
-            "text-center"
-        ]);
-        container = classNames([
-            "flex",
-            "flex-col",
-            "justify-center",
-            "items-center"
-        ]);
-        visualizerContainer = classNames(["relative"]);
+        get heading() {
+            return classNames([
+                "text-5xl",
+                "my-8",
+                "font-display",
+                "text-center"
+            ]);
+        }
+        get container() {
+            return classNames([
+                "flex",
+                "flex-col",
+                "justify-center",
+                "items-center"
+            ]);
+        }
+        get visualizerContainer() {
+            return classNames(["relative"]);
+        }
     })();
     timerWorker: Worker;
 

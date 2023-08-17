@@ -16,17 +16,6 @@ import { Coords } from "../constants";
 
 class RingSettingsMenu implements RedomComponent {
     private classes = new (class {
-        container = classNames([
-            "flex",
-            "flex-col",
-            "rounded-md",
-            "p-3",
-            "bg-neutral-800",
-            "w-28",
-            "absolute",
-            "gap-2"
-        ]);
-        ringIdContainer = classNames(["text-center", "text-sm"]);
         #button = [
             "rounded-md",
             "h-10",
@@ -40,23 +29,47 @@ class RingSettingsMenu implements RedomComponent {
             "transition-all",
             "focus:outline-none"
         ];
-        getPlayPause = (paused: boolean) =>
-            classNames([...this.#button], {
+        get container() {
+            return classNames([
+                "flex",
+                "flex-col",
+                "rounded-md",
+                "p-3",
+                "bg-neutral-800",
+                "w-28",
+                "absolute",
+                "gap-2"
+            ]);
+        }
+        get ringIdContainer() {
+            return classNames(["text-center", "text-sm"]);
+        }
+        getPlayPause(paused: boolean) {
+            return classNames([...this.#button], {
                 "bg-yellow-200": !paused,
                 "bg-blue-300": paused
             });
-        delete = classNames([...this.#button, "bg-red-300"]);
-        buttonsContainer = classNames(["grid", "grid-cols-2", "gap-2"]);
-        beatCountInput = classNames([
-            "rounded-md",
-            "h-10",
-            "font-semibold",
-            "text-neutral-400",
-            "bg-neutral-700",
-            "px-3",
-            "focus:outline-none"
-        ]);
-        reorderButton = classNames([...this.#button, "bg-neutral-300"]);
+        }
+        get delete() {
+            return classNames([...this.#button, "bg-red-300"]);
+        }
+        get buttonsContainer() {
+            return classNames(["grid", "grid-cols-2", "gap-2"]);
+        }
+        get beatCountInput() {
+            return classNames([
+                "rounded-md",
+                "h-10",
+                "font-semibold",
+                "text-neutral-400",
+                "bg-neutral-700",
+                "px-3",
+                "focus:outline-none"
+            ]);
+        }
+        get reorderButton() {
+            return classNames([...this.#button, "bg-neutral-300"]);
+        }
     })();
 
     ringId: number;
