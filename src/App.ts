@@ -5,6 +5,7 @@ import Visualizer from "./components/Visualizer";
 import Swal from "sweetalert2";
 import colors from "tailwindcss/colors";
 import { audioContext } from "./services/global";
+import RingAdder from "./components/RingAdder";
 
 class App implements RedomComponent {
     el: HTMLDivElement;
@@ -15,10 +16,15 @@ class App implements RedomComponent {
             "flex-col",
             "justify-center",
             "items-center"
+        ]),
+        visualizerContainer: classNames([
+            'relative'
         ])
     };
-    visualizer: Visualizer;
     timerWorker: Worker;
+
+    visualizer: Visualizer;
+    ringAdder: RingAdder;
     constructor() {
         this.el = el(
             "div",
@@ -26,7 +32,10 @@ class App implements RedomComponent {
                 el("h1", "Polyrhythm Visualizer", {
                     className: this.classes.heading
                 }),
-                (this.visualizer = new Visualizer())
+                el('div', [
+                    (this.visualizer = new Visualizer()),
+                    (this.ringAdder = new RingAdder())
+                ], { className: this.classes.visualizerContainer })
             ],
             { className: this.classes.container }
         );
@@ -57,6 +66,9 @@ class App implements RedomComponent {
         if (audioContext.state == "suspended") audioContext.resume();
         this.timerWorker.postMessage("start");
         this.visualizer.init();
+        this.ringAdder.onClick = () => {
+            this.visualizer.addRing();
+        }
     }
 }
 

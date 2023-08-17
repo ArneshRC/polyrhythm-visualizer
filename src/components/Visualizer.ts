@@ -228,6 +228,10 @@ class Visualizer implements RedomComponent {
         ring1!.beatCount = 3;
         ring2!.beatCount = 2;
         this.attachHoverHandler();
+        (window as any).rings = {
+            add: () => this.addRing(),
+            all: this.activeRings
+        }
     }
 }
 
