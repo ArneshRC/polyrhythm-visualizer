@@ -7,3 +7,8 @@ export const ringColors = [
     "sky"
 ] as const;
 export type RingColor = (typeof ringColors)[number];
+
+export interface Coords {
+    x: number;
+    y: number;
+}

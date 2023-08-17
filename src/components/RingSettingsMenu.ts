@@ -1,16 +1,18 @@
 import { RedomComponent, el, setAttr, setChildren } from "redom";
 import classNames from "classnames";
-import { mdiPlay, mdiPause, mdiDelete } from "@mdi/js";
+import {
+    mdiPlay,
+    mdiPause,
+    mdiDelete,
+    mdiChevronUp,
+    mdiChevronDown
+} from "@mdi/js";
+import { inRange } from "lodash";
 
 import RingSettings from "../services/RingSettings";
 import RingState from "../services/RingState";
 import Icon from "./Icon";
-import { inRange } from "lodash";
-
-interface Coords {
-    x: number;
-    y: number;
-}
+import { Coords } from "../constants";
 
 class RingSettingsMenu implements RedomComponent {
     private classes = new (class {
@@ -54,6 +56,7 @@ class RingSettingsMenu implements RedomComponent {
             "px-3",
             "focus:outline-none"
         ]);
+        reorderButton = classNames([...this.#button, "bg-neutral-300"]);
     })();
 
     ringId: number;
@@ -65,6 +68,8 @@ class RingSettingsMenu implements RedomComponent {
     buttonsContainer: HTMLDivElement;
     delete: HTMLButtonElement;
     beatCountInput: HTMLInputElement;
+    moveUp: HTMLButtonElement;
+    moveDown: HTMLButtonElement;
 
     el: HTMLDivElement;
 
@@ -91,9 +96,20 @@ class RingSettingsMenu implements RedomComponent {
             className: this.classes.delete
         });
 
-        this.buttonsContainer = el("div", [this.playPause, this.delete], {
-            className: this.classes.buttonsContainer
+        this.moveUp = el("button", [new Icon(mdiChevronUp)], {
+            className: this.classes.reorderButton
         });
+        this.moveDown = el("button", [new Icon(mdiChevronDown)], {
+            className: this.classes.reorderButton
+        });
+
+        this.buttonsContainer = el(
+            "div",
+            [this.playPause, this.delete, this.moveUp, this.moveDown],
+            {
+                className: this.classes.buttonsContainer
+            }
+        );
 
         this.beatCountInput = el("input", {
             className: this.classes.beatCountInput,
@@ -141,10 +157,18 @@ class RingSettingsMenu implements RedomComponent {
             this.ringRemoveHandler();
         });
 
-        this.beatCountInput.addEventListener("input", _event => {
+        this.beatCountInput.addEventListener("input", () => {
             const newBeatCount = parseInt(this.beatCountInput.value);
             if (!inRange(newBeatCount, 1, 9)) return;
             this.beatCountChangeHandler(newBeatCount);
+        });
+
+        this.moveUp.addEventListener("click", () => {
+            this.ringReorderHandler(true);
+        });
+
+        this.moveDown.addEventListener("click", () => {
+            this.ringReorderHandler(false);
         });
     }
     async animateClose() {}
@@ -159,6 +183,10 @@ class RingSettingsMenu implements RedomComponent {
         beatCountChangeHandler: (newBeatCount: number) => void
     ) {
         this.beatCountChangeHandler = beatCountChangeHandler;
+    }
+    private ringReorderHandler: (moveUp: boolean) => void = () => {};
+    set onRingReorder(ringReorderHandler: (moveUp: boolean) => void) {
+        this.ringReorderHandler = ringReorderHandler;
     }
 
     onmount() {

@@ -80,6 +80,10 @@ class Visualizer implements RedomComponent {
         done: false
     };
 
+    getRingRadius(ringIdx: number) {
+        return (ringIdx/2 + 1) * 60;
+    }
+
     private ringClickHandler: (idx: number, x: number, y: number) => void =
         _idx => {};
     private outsideClickHandler: () => void = () => {};
@@ -117,9 +121,7 @@ class Visualizer implements RedomComponent {
             const cx = w / 2;
             const cy = h / 2;
 
-            const r =
-                (Math.min(w, h) * this.activeRings.length) / 16 +
-                (appSettings.maxRings - idx * 3) * 10;
+            const r = this.getRingRadius(idx);
 
             const drawBeaters = () => {
                 const beatCount = ring.beatCount;
@@ -212,9 +214,7 @@ class Visualizer implements RedomComponent {
             let hovering = false;
 
             for (let idx = 0; idx < this.activeRings.length; idx++) {
-                const rRing =
-                    (Math.min(w, h) * this.activeRings.length) / 16 +
-                    (appSettings.maxRings - idx * 3) * 10;
+                const rRing = this.getRingRadius(idx);
                 const rRingInner = rRing - this.ringTrackThickness / 2;
                 const rRingOuter = rRing + this.ringTrackThickness / 2;
 
@@ -250,9 +250,7 @@ class Visualizer implements RedomComponent {
             let clickedRingIdx: number | null = null;
 
             for (let idx = 0; idx < this.activeRings.length; idx++) {
-                const rRing =
-                    (Math.min(w, h) * this.activeRings.length) / 16 +
-                    (appSettings.maxRings - idx * 3) * 10;
+                const rRing = this.getRingRadius(idx);
                 const rRingInner = rRing - this.ringTrackThickness / 2;
                 const rRingOuter = rRing + this.ringTrackThickness / 2;
 

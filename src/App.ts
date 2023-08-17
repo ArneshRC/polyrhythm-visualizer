@@ -2,11 +2,13 @@ import { RedomComponent, el, mount, unmount } from "redom";
 import classNames from "classnames";
 import Swal from "sweetalert2";
 import colors from "tailwindcss/colors";
+import { findIndex } from "lodash";
 
 import { audioContext } from "./services/global";
 import Visualizer from "./components/Visualizer";
 import RingAdder from "./components/RingAdder";
 import RingSettingsMenu from "./components/RingSettingsMenu";
+import { swap } from "./utils";
 
 class App implements RedomComponent {
     el: HTMLDivElement;
@@ -54,10 +56,11 @@ class App implements RedomComponent {
         this.currentRingSettingsMenu = null;
     }
 
-    async openSettingsMenu(ringIdx: number, x: number, y: number) {
+    async openSettingsMenu(ringId: number, x: number, y: number) {
         await this.closeSettingsMenu();
+        const activeRings = this.visualizer.activeRings;
+        const ringIdx = findIndex(activeRings, { id: ringId });
         const ring = this.visualizer.activeRings[ringIdx];
-        const ringId = ring.id;
         this.currentRingSettingsMenu = new RingSettingsMenu(
             ringId,
             ring.state,
@@ -70,6 +73,19 @@ class App implements RedomComponent {
         this.currentRingSettingsMenu.onRingRemove = () => {
             this.visualizer.removeRing(ringId);
             this.closeSettingsMenu();
+        };
+        this.currentRingSettingsMenu.onRingReorder = moveUp => {
+            const ringIdx = findIndex(activeRings, ring);
+            if (
+                (moveUp && ringIdx == activeRings.length - 1) ||
+                (!moveUp && ringIdx == 0)
+            )
+                return;
+            swap(
+                activeRings,
+                ringIdx,
+                moveUp ? ringIdx + 1 : ringIdx - 1
+            );
         };
         mount(this.visualizerContainer, this.currentRingSettingsMenu);
     }
@@ -105,7 +121,7 @@ class App implements RedomComponent {
             this.visualizer.addRing();
         };
         this.visualizer.onRingClick = (idx, x, y) => {
-            this.openSettingsMenu(idx, x, y);
+            this.openSettingsMenu(this.visualizer.activeRings[idx].id, x, y);
         };
         this.visualizer.onOutsideClick = () => {
             this.closeSettingsMenu();
