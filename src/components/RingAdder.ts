@@ -45,6 +45,14 @@ class RingAdder implements RedomComponent {
         });
     }
 
+    hide() {
+        this.el.classList.add("invisible");
+    }
+
+    show() {
+        this.el.classList.remove("invisible");
+    }
+
     clickHandler: () => void = () => {};
     set onClick(clickHandler: () => void) {
         this.clickHandler = clickHandler;

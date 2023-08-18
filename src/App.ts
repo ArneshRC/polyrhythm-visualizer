@@ -1,8 +1,8 @@
-import { RedomComponent, el, mount, unmount } from "redom";
+import { RedomComponent, el, mount, setChildren, text, unmount } from "redom";
 import classNames from "classnames";
 import { findIndex } from "lodash";
 
-import { audioContext } from "./services/global";
+import { appSettings, audioContext } from "./services/global";
 import Visualizer from "./components/Visualizer";
 import RingAdder from "./components/RingAdder";
 import RingSettingsMenu from "./components/RingSettingsMenu";
@@ -22,9 +22,7 @@ class App implements RedomComponent {
             ]);
         }
         get description() {
-            return classNames([
-                "my-6"
-            ]);
+            return classNames(["font-sans", "my-6", "text-base"]);
         }
         get container() {
             return classNames([
@@ -43,6 +41,7 @@ class App implements RedomComponent {
     private timerWorker: Worker;
 
     // Components
+    private description: HTMLDivElement;
     private visualizerContainer: HTMLDivElement;
     private visualizer: Visualizer;
     private ringAdder: RingAdder;
@@ -56,7 +55,10 @@ class App implements RedomComponent {
         this.visualizerContainer = el(
             "div",
             [this.visualizer, this.ringAdder],
-            { id: "visualizer-container", className: this.classes.visualizerContainer }
+            {
+                id: "visualizer-container",
+                className: this.classes.visualizerContainer
+            }
         );
 
         this.el = el(
@@ -66,10 +68,14 @@ class App implements RedomComponent {
                     id: "heading",
                     className: this.classes.heading
                 }),
-                el("div", "Click any ring to configure it. Click the '+' button to add a new ring.", {
-                    id: "description",
-                    className: this.classes.description
-                }),
+                (this.description = el(
+                    "div",
+                    "Click any ring to configure it. Click the '+' button to add a new ring.",
+                    {
+                        id: "description",
+                        className: this.classes.description
+                    }
+                )),
                 this.visualizerContainer
             ],
             { className: this.classes.container }
@@ -114,6 +120,19 @@ class App implements RedomComponent {
         this.currentRingSettingsMenu.onRingRemove = () => {
             this.visualizer.removeRing(ringId);
             this.closeRingSettingsMenu();
+            // If number of rings is equal to maxRings
+            if (
+                this.visualizer.state.activeRings.length <= appSettings.maxRings
+            ) {
+                // Show the ring adder
+                this.ringAdder.show();
+                // Accordingly update description
+                setChildren(this.description, [
+                    text(
+                        "Click any ring to configure it. Click the '+' button to add a new ring."
+                    )
+                ]);
+            }
         };
 
         this.currentRingSettingsMenu.onRingReorder = moveUp => {
@@ -170,6 +189,17 @@ class App implements RedomComponent {
         this.ringAdder.onClick = () => {
             // Add a ring
             this.visualizer.addRing();
+            // If maxRings has been reached...
+            if (
+                this.visualizer.state.activeRings.length >= appSettings.maxRings
+            ) {
+                // ... hide the ring adder
+                this.ringAdder.hide();
+                // ... and accordingly update description
+                setChildren(this.description, [
+                    text("Click any ring to configure it.")
+                ]);
+            }
         };
 
         // When a ring is clicked
@@ -211,60 +241,63 @@ class App implements RedomComponent {
                 this.closeRingSettingsMenu();
         });
 
-        new Scene({
-            "#heading": {
-                0.3: {
-                    opacity: 0,
-                    transform: {
-                        scale: 0,
-                        translateY: "10rem"
+        new Scene(
+            {
+                "#heading": {
+                    0.3: {
+                        opacity: 0,
+                        transform: {
+                            scale: 0,
+                            translateY: "10rem"
+                        }
+                    },
+                    1: {
+                        opacity: 1,
+                        transform: {
+                            scale: 1,
+                            translateY: "0rem"
+                        }
                     }
                 },
-                1: {
-                    opacity: 1,
-                    transform: {
-                        scale: 1,
-                        translateY: "0rem"
+                "#description": {
+                    0.8: {
+                        opacity: 0
+                    },
+                    1.3: {
+                        opacity: 1
                     }
                 },
-            },
-            "#description": {
-                0.8: {
-                    opacity: 0
+                "#visualizer": {
+                    0: {
+                        opacity: 0,
+                        scale: 0.2
+                    },
+                    0.8: {
+                        opacity: 1,
+                        scale: 1.1
+                    },
+                    1: {
+                        scale: 0.95
+                    },
+                    1.3: {
+                        scale: 1
+                    }
                 },
-                1.3: {
-                    opacity: 1
+                "#ring-adder": {
+                    0.5: {
+                        opacity: 0
+                    },
+                    1: {
+                        opacity: 1
+                    }
                 }
             },
-            "#visualizer": {
-                0: {
-                    opacity: 0,
-                    scale: 0.2
-                },
-                0.8: {
-                    opacity: 1,
-                    scale: 1.1
-                },
-                1: {
-                    scale: 0.95
-                },
-                1.3: {
-                    scale: 1
-                }
-            },
-            "#ring-adder": {
-                0.5: {
-                    opacity: 0,
-                },
-                1: {
-                    opacity: 1,
-                }
+            {
+                fillMode: "forwards",
+                selector: true,
+                easing: EASE_IN_OUT
             }
-        }, {
-            fillMode: "forwards",
-            selector: true,
-            easing: EASE_IN_OUT
-        }).playCSS();
+        ).playCSS();
     }
 }
 

@@ -3,7 +3,6 @@ import App from "./App";
 
 import "./styles/index.css";
 
-window.addEventListener('load', () => {
+window.addEventListener("load", () => {
     mount(document.querySelector<HTMLDivElement>("#app")!, new App());
-})
-
+});
