@@ -7,6 +7,7 @@ import Visualizer from "./components/Visualizer";
 import RingAdder from "./components/RingAdder";
 import RingSettingsMenu from "./components/RingSettingsMenu";
 import { swap } from "./utils";
+import { EASE, EASE_IN_OUT, Scene } from "scenejs";
 
 class App implements RedomComponent {
     el: HTMLDivElement;
@@ -50,13 +51,14 @@ class App implements RedomComponent {
         this.visualizerContainer = el(
             "div",
             [this.visualizer, this.ringAdder],
-            { className: this.classes.visualizerContainer }
+            { id: "visualizer-container", className: this.classes.visualizerContainer }
         );
 
         this.el = el(
             "div",
             [
                 el("h1", "Polyrhythm Visualizer", {
+                    id: "heading",
                     className: this.classes.heading
                 }),
                 this.visualizerContainer
@@ -199,6 +201,54 @@ class App implements RedomComponent {
             )
                 this.closeRingSettingsMenu();
         });
+
+        new Scene({
+            "#heading": {
+                0.3: {
+                    opacity: 0,
+                    transform: {
+                        scale: 0,
+                        translateY: "10rem"
+                    }
+                },
+                1: {
+                    opacity: 1,
+                    transform: {
+                        scale: 1,
+                        translateY: "0rem"
+                    }
+                },
+            },
+            "#visualizer": {
+                0: {
+                    opacity: 0,
+                    scale: 0.2
+                },
+                0.8: {
+                    opacity: 1,
+                    scale: 1.1
+                },
+                1: {
+                    scale: 0.95
+                },
+                1.3: {
+                    scale: 1
+                }
+            },
+        
+            "#ring-adder": {
+                0.5: {
+                    opacity: 0,
+                },
+                1: {
+                    opacity: 1,
+                }
+            }
+        }, {
+            fillMode: "forwards",
+            selector: true,
+            easing: EASE_IN_OUT
+        }).playCSS();
     }
 }
 

@@ -35,6 +35,7 @@ class RingAdder implements RedomComponent {
 
     constructor() {
         this.el = el("button", new Icon(mdiPlus, colors.neutral[400]), {
+            id: "ring-adder",
             className: this.classes.plus
         });
         this.el.addEventListener("click", () => {
