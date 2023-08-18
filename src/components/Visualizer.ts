@@ -110,7 +110,7 @@ class Visualizer implements RedomComponent {
                 // ... from the list of colors
                 ringColors,
                 // ... except those which are currently active
-                this.state.activeRings.map(ring => ring.colorName)
+                this.state.activeRings.map(ring => ring.settings.colorName)
             )
         )!;
 
@@ -181,7 +181,7 @@ class Visualizer implements RedomComponent {
                     // Consume beat from the beat queue
                     ring.scheduler.updateCurrentBeat();
 
-                    ctx.fillStyle = colors[ring.colorName][200];
+                    ctx.fillStyle = colors[ring.settings.colorName][200];
 
                     // If the current beat is begin drawn
                     if (!ring.state.paused && ring.scheduler.currentBeat == i) {
@@ -192,7 +192,7 @@ class Visualizer implements RedomComponent {
                         // Draw beater circle
                         ctx.arc(cxi, cyi, beaterRadius, 0, 2 * Math.PI);
                         ctx.fill();
-                        ctx.fillStyle = colors[ring.colorName][900];
+                        ctx.fillStyle = colors[ring.settings.colorName][900];
 
                         // Display beat number
                         ctx.font = "15px sans-serif";

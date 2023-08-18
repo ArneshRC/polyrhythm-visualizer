@@ -4,16 +4,17 @@ import { Instrument, Kick } from "./Instrument";
 import BeatScheduler from "../services/BeatScheduler";
 import { RingColor } from "../constants";
 
-interface RingSettings {
-    beatCount: number;
-    instrument: Instrument;
-}
-
 interface RingState {
     currentBeatCount: number;
     beatPlayed: boolean;
     beatCountChanged: boolean;
     paused: boolean;
+}
+
+interface RingSettings {
+    beatCount: number;
+    instrument: Instrument;
+    colorName: RingColor;
 }
 
 class Ring {
@@ -23,7 +24,8 @@ class Ring {
 
     public settings: RingSettings = {
         beatCount: 4,
-        instrument: new Kick()
+        instrument: new Kick(),
+        colorName: 'blue'
     };
 
     public state: RingState = {
@@ -35,8 +37,6 @@ class Ring {
 
     // Generate an id
     public id = Ring.globalCount++;
-
-    public colorName: RingColor;
 
     public scheduler = new BeatScheduler(this.state, this.settings);
 
@@ -75,14 +75,14 @@ class Ring {
      * The ring color
      */
     get color() {
-        return colors[this.colorName][500];
+        return colors[this.settings.colorName][500];
     }
 
     /**
      * The track color
      */
     get trackColor() {
-        return colors[this.colorName][900];
+        return colors[this.settings.colorName][900];
     }
 
     /**
@@ -95,7 +95,7 @@ class Ring {
     }
 
     constructor(colorName: RingColor) {
-        this.colorName = colorName;
+        this.settings.colorName = colorName;
     }
 }
 

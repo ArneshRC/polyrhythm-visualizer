@@ -1,7 +1,5 @@
 import { RedomComponent, el, mount, unmount } from "redom";
 import classNames from "classnames";
-import Swal from "sweetalert2";
-import colors from "tailwindcss/colors";
 import { findIndex } from "lodash";
 
 import { audioContext } from "./services/global";
@@ -156,23 +154,6 @@ class App implements RedomComponent {
 
     async onmount() {
 
-        // Greet user
-        await Swal.fire({
-            icon: "info",
-            title: "Welcome",
-            text: "This is a rewrite of the original app with a completely new vision. Enjoy!",
-            color: colors.neutral[300],
-            background: colors.neutral[900],
-            iconColor: colors.sky[300],
-            confirmButtonColor: colors.blue[500]
-        });
-
-        // Workaround. An audioContext can't start without
-        // user interaction. Since this audioContext is global, 
-        // it is started before any user interaction, and ends
-        // up in the suspended state.
-        if (audioContext.state == "suspended") audioContext.resume();
-
         // Start the timer
         this.timerWorker.postMessage("start");
 
@@ -202,6 +183,13 @@ class App implements RedomComponent {
 
         // When the click is anywhere in the document
         document.addEventListener("click", event => {
+
+            // Resume the audioContext if it is suspended.
+            // An audioContext can't start without user interaction.
+            // Since this audioContext is global, it is started before
+            // any user interaction, and ends up in the suspended state.
+            if (audioContext.state == "suspended") audioContext.resume();
+
             if (
                 // There must be currently open settings menu
                 this.currentRingSettingsMenu != null &&
