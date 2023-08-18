@@ -12,8 +12,7 @@ class RingAdder implements RedomComponent {
                 "w-10",
                 "h-10",
                 "absolute",
-                "rounded-md",
-                "bg-neutral-700",
+                "rounded-full",
                 "text-neutral-200",
                 "cursor-pointer",
                 "top-1/2",
@@ -27,14 +26,17 @@ class RingAdder implements RedomComponent {
                 "items-center",
                 "justify-center",
                 "px-1",
-                "hover:bg-neutral-600",
+                "border-2",
+                "border-dashed",
+                "border-neutral-500",
+                "hover:bg-neutral-800",
                 "transition-all"
             ]);
         }
     })();
 
     constructor() {
-        this.el = el("button", new Icon(mdiPlus, colors.neutral[400]), {
+        this.el = el("button", new Icon(mdiPlus, colors.neutral[500]), {
             id: "ring-adder",
             className: this.classes.plus
         });
