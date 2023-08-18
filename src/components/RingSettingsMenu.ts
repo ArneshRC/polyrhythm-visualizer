@@ -40,7 +40,8 @@ class RingSettingsMenu implements RedomComponent {
                 "bg-neutral-800",
                 "w-28",
                 "absolute",
-                "gap-2"
+                "gap-2",
+                "shadow-md"
             ]);
         }
         get ringIdContainer() {
@@ -127,7 +128,12 @@ class RingSettingsMenu implements RedomComponent {
         // Grid container for buttons
         this.buttonsContainer = el(
             "div",
-            [this.playPauseButton, this.deleteButton, this.moveUpButton, this.moveDownButton],
+            [
+                this.playPauseButton,
+                this.deleteButton,
+                this.moveUpButton,
+                this.moveDownButton
+            ],
             {
                 className: this.classes.buttonsContainer
             }
@@ -169,7 +175,6 @@ class RingSettingsMenu implements RedomComponent {
      * Set up event handlers
      */
     setupHandlers() {
-        
         // When the play/pause button is clicked
         this.playPauseButton.addEventListener("click", () => {
             let paused = this.ringState.paused;
@@ -223,68 +228,74 @@ class RingSettingsMenu implements RedomComponent {
      * @TODO Animate when the menu is open
      */
     async animateOpen() {
-        this.el.classList.add('opening');
-        new Scene({
-            [`#ring-settings-${this.ringId}`]: {
-                0: {
-                    opacity: 0,
-                    transform: {
-                        translateX: "-40%",
-                        translateY: "-40%",
-                        scale: 0.2
-                    }
-                },
-                0.2: {
-                    opacity: 1,
-                    transform: {
-                        translateX: "0%",
-                        translateY: "0%",
-                        scale: 1
+        this.el.classList.add("opening");
+        new Scene(
+            {
+                [`#ring-settings-${this.ringId}`]: {
+                    0: {
+                        opacity: 0,
+                        transform: {
+                            translateX: "-40%",
+                            translateY: "-40%",
+                            scale: 0.2
+                        }
+                    },
+                    0.2: {
+                        opacity: 1,
+                        transform: {
+                            translateX: "0%",
+                            translateY: "0%",
+                            scale: 1
+                        }
                     }
                 }
+            },
+            {
+                selector: true,
+                fillMode: "forwards",
+                iterationCount: 1,
+                easing: EASE
             }
-        }, {
-            selector: true,
-            fillMode: "forwards",
-            iterationCount: 1,
-            easing: EASE
-        }).playCSS();
+        ).playCSS();
         await sleep(200);
-        this.el.classList.remove('opening');
+        this.el.classList.remove("opening");
     }
 
     /**
      * @TODO Animate when the menu is closed
      */
     async animateClose() {
-        this.el.classList.add('closing');
-        const scene = new Scene({
-            [`#ring-settings-${this.ringId}.closing`]: {
-                0: {
-                    opacity: 1,
-                    transform: {
-                        translateX: "0%",
-                        translateY: "0%",
-                        scale: 1
-                    }
-                },
-                0.2: {
-                    opacity: 0,
-                    transform: {
-                        translateX: "-40%",
-                        translateY: "-40%",
-                        scale: 0.2
+        this.el.classList.add("closing");
+        const scene = new Scene(
+            {
+                [`#ring-settings-${this.ringId}.closing`]: {
+                    0: {
+                        opacity: 1,
+                        transform: {
+                            translateX: "0%",
+                            translateY: "0%",
+                            scale: 1
+                        }
+                    },
+                    0.2: {
+                        opacity: 0,
+                        transform: {
+                            translateX: "-40%",
+                            translateY: "-40%",
+                            scale: 0.2
+                        }
                     }
                 }
+            },
+            {
+                selector: true,
+                fillMode: "forwards",
+                iterationCount: 1,
+                easing: EASE
             }
-        }, {
-            selector: true,
-            fillMode: "forwards",
-            iterationCount: 1,
-            easing: EASE
-        }).playCSS();
+        ).playCSS();
         await sleep(200);
-        this.el.classList.remove('closing');
+        this.el.classList.remove("closing");
         scene.clear();
     }
 

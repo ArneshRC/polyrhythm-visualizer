@@ -1,11 +1,4 @@
-const ringColors = [
-    "blue",
-    "red",
-    "yellow",
-    "green",
-    "purple",
-    "sky"
-] as const;
+const ringColors = ["blue", "red", "yellow", "green", "purple", "sky"] as const;
 type RingColor = (typeof ringColors)[number];
 
 interface Coords {

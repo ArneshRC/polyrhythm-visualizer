@@ -8,7 +8,6 @@ const appSettings: AppSettings = {
     maxRings: 5
 };
 
-
 /**
  * Global audio context
  */

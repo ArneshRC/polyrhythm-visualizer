@@ -7,13 +7,13 @@ import { appSettings, audioContext } from "../services/global";
 import Ring from "../utils/Ring";
 
 interface VisualizerState {
-    activeRings: Ring[],
-    hoveringRingIdx?: number
+    activeRings: Ring[];
+    hoveringRingIdx?: number;
     animation: {
-        progress: number,
-        duration: number,
-        done: boolean
-    }
+        progress: number;
+        duration: number;
+        done: boolean;
+    };
 }
 
 class Visualizer implements RedomComponent {
@@ -54,7 +54,7 @@ class Visualizer implements RedomComponent {
             duration: appSettings.measureDuration * 1000,
             done: false
         }
-    }
+    };
 
     get ringThickness() {
         return 10 * this.dimensions.unit;
@@ -144,7 +144,6 @@ class Visualizer implements RedomComponent {
          * @param angle The angle which the ring has completed
          */
         const drawRing = (ring: Ring, angle: number) => {
-
             const idx = findIndex(this.state.activeRings, ring);
 
             // Center of canvas
@@ -158,12 +157,10 @@ class Visualizer implements RedomComponent {
              * Draw the beaters at equally spaced intervals
              */
             const drawBeaters = () => {
-
                 // Number of beaters = beatCount
                 const beatCount = ring.beatCount;
 
                 for (let i = 0; i < beatCount; i++) {
-
                     // Angle of the beater w.r.t. center
                     // of screen and vertical axis;
                     // 0 means at the top of the ring
@@ -185,7 +182,6 @@ class Visualizer implements RedomComponent {
 
                     // If the current beat is begin drawn
                     if (!ring.state.paused && ring.scheduler.currentBeat == i) {
-
                         // Bigger radius, for emphasis
                         const beaterRadius = 10 * this.dimensions.unit;
 
@@ -205,7 +201,6 @@ class Visualizer implements RedomComponent {
                             // Accordingly set `beatPlayed`
                             ring.state.beatPlayed = true;
                         }
-
                     } else {
                         // Smaller radius
                         const beaterRadius = 5 * this.dimensions.unit;
@@ -217,7 +212,6 @@ class Visualizer implements RedomComponent {
 
                     ctx.closePath();
                 }
-
             };
 
             ctx.beginPath();
@@ -263,12 +257,15 @@ class Visualizer implements RedomComponent {
         // Increment progress
         // % 1 gives the fractional part
         this.state.animation.progress =
-            ((audioContext.currentTime * 1000) / this.state.animation.duration) % 1;
+            ((audioContext.currentTime * 1000) /
+                this.state.animation.duration) %
+            1;
 
         ctx.clearRect(0, 0, w, h);
 
         // Calculate angle, starting from -pi/2
-        const angle = -0.5 * Math.PI + this.state.animation.progress * 2 * Math.PI;
+        const angle =
+            -0.5 * Math.PI + this.state.animation.progress * 2 * Math.PI;
 
         // Loop over the active rings
         for (let idx = 0; idx < this.state.activeRings.length; idx++) {
@@ -276,22 +273,21 @@ class Visualizer implements RedomComponent {
             drawRing(
                 this.state.activeRings[idx],
                 // If the ring is paused, freeze it at -pi/2
-                this.state.activeRings[idx].state.paused ? -0.5 * Math.PI : angle
+                this.state.activeRings[idx].state.paused
+                    ? -0.5 * Math.PI
+                    : angle
             );
         }
 
         // Request next frame
         requestAnimationFrame(this.draw.bind(this));
-
     }
 
     /**
      * Set up the hover handler
      */
     private setupHoverHandler() {
-
         this.el.addEventListener("mousemove", event => {
-
             const w = this.dimensions.width;
             const h = this.dimensions.height;
 
@@ -333,9 +329,7 @@ class Visualizer implements RedomComponent {
                 // Unset hoveringRingIdx if not hovering
                 this.state.hoveringRingIdx = undefined;
             }
-
         });
-
     }
 
     private setupClickHandler() {
@@ -399,7 +393,6 @@ class Visualizer implements RedomComponent {
      * Start animation and add 2 initial rings
      */
     async init() {
-
         // Start the animation (request first frame)
         requestAnimationFrame(this.draw.bind(this));
 

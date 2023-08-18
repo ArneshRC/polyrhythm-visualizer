@@ -18,14 +18,13 @@ interface RingSettings {
 }
 
 class Ring {
-
     // This is used for ids
     static globalCount = 0;
 
     public settings: RingSettings = {
         beatCount: 4,
         instrument: new Kick(),
-        colorName: 'blue'
+        colorName: "blue"
     };
 
     public state: RingState = {

@@ -9,7 +9,6 @@ import RingSettingsMenu from "./components/RingSettingsMenu";
 import { swap } from "./utils";
 
 class App implements RedomComponent {
-
     el: HTMLDivElement;
 
     private classes = new (class {
@@ -48,9 +47,11 @@ class App implements RedomComponent {
         this.ringAdder = new RingAdder();
 
         // Contains visualizer and ring adder
-        this.visualizerContainer = el("div", [
-            this.visualizer, this.ringAdder
-        ], { className: this.classes.visualizerContainer  });
+        this.visualizerContainer = el(
+            "div",
+            [this.visualizer, this.ringAdder],
+            { className: this.classes.visualizerContainer }
+        );
 
         this.el = el(
             "div",
@@ -70,7 +71,6 @@ class App implements RedomComponent {
      * Close the currently open ring settings menu
      */
     private async closeRingSettingsMenu() {
-
         // Do nothing if no ring settings menu is open
         if (this.currentRingSettingsMenu == null) return;
 
@@ -78,11 +78,9 @@ class App implements RedomComponent {
         this.currentRingSettingsMenu = null;
         await prevRingSettingsMenu.animateClose();
         unmount(this.visualizerContainer, prevRingSettingsMenu);
-
     }
 
     private async openRingSettingsMenu(ringId: number, x: number, y: number) {
-
         // Close the currently open ring settings menu first
         this.closeRingSettingsMenu();
 
@@ -125,14 +123,12 @@ class App implements RedomComponent {
         };
 
         mount(this.visualizerContainer, this.currentRingSettingsMenu);
-
     }
 
     /**
      * Setup the timer worker
      */
     private setupTimer() {
-
         const timerWorker = new Worker(
             // Importing in this way enables vite to deal with it
             new URL("./workers/timer.worker.ts", import.meta.url)
@@ -150,11 +146,9 @@ class App implements RedomComponent {
         });
 
         return timerWorker;
-
     }
 
     async onmount() {
-
         // Start the timer
         this.timerWorker.postMessage("start");
 
@@ -184,7 +178,6 @@ class App implements RedomComponent {
 
         // When the click is anywhere in the document
         document.addEventListener("click", event => {
-
             // Resume the audioContext if it is suspended.
             // An audioContext can't start without user interaction.
             // Since this audioContext is global, it is started before
