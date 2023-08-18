@@ -22,7 +22,7 @@ class App implements RedomComponent {
             ]);
         }
         get description() {
-            return classNames(["font-sans", "my-6", "text-base"]);
+            return classNames(["font-sans", "my-6", "mx-4", "text-base", "text-center"]);
         }
         get container() {
             return classNames([
