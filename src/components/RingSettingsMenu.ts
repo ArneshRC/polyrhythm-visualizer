@@ -1,4 +1,11 @@
-import { RedomComponent, el, text, setAttr, setChildren } from "redom";
+import {
+    RedomComponent,
+    el,
+    mount,
+    setAttr,
+    setChildren,
+    unmount
+} from "redom";
 import classNames from "classnames";
 import {
     mdiPlay,
@@ -7,7 +14,8 @@ import {
     mdiChevronUp,
     mdiChevronDown,
     mdiPlus,
-    mdiMinus
+    mdiMinus,
+    mdiPalette
 } from "@mdi/js";
 
 import { RingSettings, RingState } from "../utils/Ring";
@@ -15,9 +23,9 @@ import Icon from "./Icon";
 import { Coords, RingColor, instrumentNames, ringColors } from "../constants";
 import { EASE, Scene } from "scenejs";
 import { sleep } from "../utils";
-import { visualizerState } from "../services/global";
-import { capitalize, findIndex, indexOf } from "lodash";
+import { capitalize, indexOf } from "lodash";
 import { Kick, Sine, Snare } from "../utils/Instrument";
+import FlyingBeatCount from "./FlyingBeatCount";
 
 class RingSettingsMenu implements RedomComponent {
     el: HTMLDivElement;
@@ -65,22 +73,7 @@ class RingSettingsMenu implements RedomComponent {
             return classNames([...this.#button, "bg-neutral-300"]);
         }
         get beatCountButton() {
-            return classNames([...this.#button, "bg-slate-300"]);
-        }
-        get beatCountDisplay() {
-            return classNames([
-                ...this.#button,
-                "bg-neutral-700",
-                "text-neutral-400",
-                "col-span-2"
-            ]);
-        }
-        get ringIdxDisplay() {
-            return classNames([
-                ...this.#button,
-                "bg-neutral-700",
-                "text-neutral-400"
-            ]);
+            return classNames([...this.#button, "bg-slate-300", "relative"]);
         }
         get instrumentButton() {
             return classNames([
@@ -116,8 +109,6 @@ class RingSettingsMenu implements RedomComponent {
     moveDownButton: HTMLButtonElement;
     incBeatCountButton: HTMLButtonElement;
     decBeatCountButton: HTMLButtonElement;
-    beatCountDisplay: HTMLDivElement;
-    ringIdxDisplay: HTMLDivElement;
     instrumentButton: HTMLButtonElement;
     colorButton: HTMLButtonElement;
 
@@ -165,31 +156,6 @@ class RingSettingsMenu implements RedomComponent {
             className: this.classes.beatCountButton
         });
 
-        this.beatCountDisplay = el(
-            "div",
-            [text(this.ringSettings.beatCount.toString())],
-            {
-                className: this.classes.beatCountDisplay
-            }
-        );
-
-        this.ringIdxDisplay = el(
-            "div",
-            [
-                text(
-                    (
-                        1 +
-                        findIndex(visualizerState.activeRings, {
-                            id: this.ringId
-                        })
-                    ).toString()
-                )
-            ],
-            {
-                className: this.classes.ringIdxDisplay
-            }
-        );
-
         this.instrumentButton = el(
             "button",
             [capitalize(this.ringSettings.instrumentName)],
@@ -198,7 +164,7 @@ class RingSettingsMenu implements RedomComponent {
             }
         );
 
-        this.colorButton = el("button", {
+        this.colorButton = el("button", [new Icon(mdiPalette)], {
             className: this.classes.getColorButton(this.ringSettings.colorName)
         });
 
@@ -208,14 +174,12 @@ class RingSettingsMenu implements RedomComponent {
             [
                 this.playPauseButton,
                 this.deleteButton,
-                this.moveUpButton,
-                this.incBeatCountButton,
+                this.colorButton,
                 this.decBeatCountButton,
-                this.moveDownButton,
-                this.beatCountDisplay,
-                this.ringIdxDisplay,
+                this.incBeatCountButton,
+                this.moveUpButton,
                 this.instrumentButton,
-                this.colorButton
+                this.moveDownButton
             ],
             {
                 className: this.classes.buttonsContainer
@@ -273,36 +237,34 @@ class RingSettingsMenu implements RedomComponent {
 
         this.moveUpButton.addEventListener("click", () => {
             this.ringReorderHandler(true);
-            // Update ring index display
-            this.ringIdxDisplay.textContent = (
-                1 + findIndex(visualizerState.activeRings, { id: this.ringId })
-            ).toString();
         });
 
         this.moveDownButton.addEventListener("click", () => {
             this.ringReorderHandler(false);
-            // Update ring index display
-            this.ringIdxDisplay.textContent = (
-                1 + findIndex(visualizerState.activeRings, { id: this.ringId })
-            ).toString();
         });
 
-        this.incBeatCountButton.addEventListener("click", () => {
+        this.incBeatCountButton.addEventListener("click", async () => {
             // Check that the value doesn't exceed max
             if (this.ringSettings.beatCount >= 8) return;
             // And update
-            this.beatCountChangeHandler(this.ringSettings.beatCount + 1);
-            this.beatCountDisplay.textContent =
-                this.ringSettings.beatCount.toString();
+            const newBeatCount = this.ringSettings.beatCount + 1;
+            this.beatCountChangeHandler(newBeatCount);
+            const flyingBeatCount = new FlyingBeatCount(newBeatCount, true);
+            mount(this.incBeatCountButton, flyingBeatCount);
+            await flyingBeatCount.animateFly();
+            unmount(this.incBeatCountButton, flyingBeatCount);
         });
 
-        this.decBeatCountButton.addEventListener("click", () => {
+        this.decBeatCountButton.addEventListener("click", async () => {
             // Check that the value is at least 2
             if (this.ringSettings.beatCount <= 1) return;
             // And update
-            this.beatCountChangeHandler(this.ringSettings.beatCount - 1);
-            this.beatCountDisplay.textContent =
-                this.ringSettings.beatCount.toString();
+            const newBeatCount = this.ringSettings.beatCount - 1;
+            this.beatCountChangeHandler(newBeatCount);
+            const flyingBeatCount = new FlyingBeatCount(newBeatCount, false);
+            mount(this.decBeatCountButton, flyingBeatCount);
+            await flyingBeatCount.animateFly();
+            unmount(this.decBeatCountButton, flyingBeatCount);
         });
 
         this.instrumentButton.addEventListener("click", () => {
