@@ -7,7 +7,7 @@ import Visualizer from "./components/Visualizer";
 import RingAdder from "./components/RingAdder";
 import RingSettingsMenu from "./components/RingSettingsMenu";
 import { swap } from "./utils";
-import { EASE, EASE_IN_OUT, Scene } from "scenejs";
+import { EASE_IN_OUT, Scene } from "scenejs";
 
 class App implements RedomComponent {
     el: HTMLDivElement;
@@ -16,9 +16,14 @@ class App implements RedomComponent {
         get heading() {
             return classNames([
                 "text-5xl",
-                "my-8",
+                "mt-8",
                 "font-display",
                 "text-center"
+            ]);
+        }
+        get description() {
+            return classNames([
+                "my-6"
             ]);
         }
         get container() {
@@ -60,6 +65,10 @@ class App implements RedomComponent {
                 el("h1", "Polyrhythm Visualizer", {
                     id: "heading",
                     className: this.classes.heading
+                }),
+                el("div", "Click any ring to configure it. Click the '+' button to add a new ring.", {
+                    id: "description",
+                    className: this.classes.description
                 }),
                 this.visualizerContainer
             ],
@@ -219,6 +228,14 @@ class App implements RedomComponent {
                     }
                 },
             },
+            "#description": {
+                0.8: {
+                    opacity: 0
+                },
+                1.3: {
+                    opacity: 1
+                }
+            },
             "#visualizer": {
                 0: {
                     opacity: 0,
@@ -235,7 +252,6 @@ class App implements RedomComponent {
                     scale: 1
                 }
             },
-        
             "#ring-adder": {
                 0.5: {
                     opacity: 0,
