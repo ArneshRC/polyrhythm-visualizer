@@ -1,19 +1,20 @@
 import colors from "tailwindcss/colors";
 
-import { Instrument, Kick } from "./Instrument";
+import { Instrument, Kick, Sine, Snare } from "./Instrument";
 import BeatScheduler from "../services/BeatScheduler";
-import { RingColor } from "../constants";
+import { InstrumentName, RingColor } from "../constants";
 
 interface RingState {
     currentBeatCount: number;
     beatPlayed: boolean;
     beatCountChanged: boolean;
+    instrument: Instrument;
     paused: boolean;
 }
 
 interface RingSettings {
     beatCount: number;
-    instrument: Instrument;
+    instrumentName: InstrumentName;
     colorName: RingColor;
 }
 
@@ -23,13 +24,14 @@ class Ring {
 
     public settings: RingSettings = {
         beatCount: 4,
-        instrument: new Kick(),
+        instrumentName: "kick",
         colorName: "blue"
     };
 
     public state: RingState = {
         paused: true,
         beatPlayed: false,
+        instrument: new Kick(),
         beatCountChanged: false,
         currentBeatCount: this.settings.beatCount
     };
@@ -84,13 +86,33 @@ class Ring {
         return colors[this.settings.colorName][900];
     }
 
+    get instrument() {
+        return this.settings.instrumentName;
+    }
+
+    set instrument(instrumentName: InstrumentName) {
+        this.settings.instrumentName = instrumentName;
+        switch (instrumentName) {
+            case "kick":
+                this.state.instrument = new Kick();
+                break;
+            case "snare":
+                this.state.instrument = new Snare();
+                break;
+            case "sine":
+                this.state.instrument = new Sine();
+                break;
+            default:
+                break;
+        }
+    }
     /**
      * Play the current instrument
      *
      * @param time audioContext timestamp
      */
     play(time?: number) {
-        this.settings.instrument.play(time);
+        this.state.instrument.play(time);
     }
 
     constructor(colorName: RingColor) {

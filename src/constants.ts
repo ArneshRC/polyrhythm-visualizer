@@ -6,5 +6,8 @@ interface Coords {
     y: number;
 }
 
-export { ringColors };
-export type { RingColor, Coords };
+const instrumentNames = ["kick", "snare", "sine"] as const;
+type InstrumentName = (typeof instrumentNames)[number];
+
+export { ringColors, instrumentNames };
+export type { RingColor, Coords, InstrumentName };

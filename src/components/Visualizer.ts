@@ -3,18 +3,9 @@ import { difference, findIndex, remove, sample } from "lodash";
 import colors from "tailwindcss/colors";
 
 import { ringColors, RingColor } from "../constants";
-import { appSettings, audioContext } from "../services/global";
+import { appSettings, audioContext, visualizerState } from "../services/global";
 import Ring from "../utils/Ring";
-
-interface VisualizerState {
-    activeRings: Ring[];
-    hoveringRingIdx?: number;
-    animation: {
-        progress: number;
-        duration: number;
-        done: boolean;
-    };
-}
+import VisualizerState from "../services/VisualizerState";
 
 class Visualizer implements RedomComponent {
     el: HTMLCanvasElement;
@@ -46,15 +37,7 @@ class Visualizer implements RedomComponent {
     /**
      * Current visualizer state
      */
-    public state: VisualizerState = {
-        activeRings: [],
-        hoveringRingIdx: undefined,
-        animation: {
-            progress: 0,
-            duration: appSettings.measureDuration * 1000,
-            done: false
-        }
-    };
+    public state: VisualizerState = visualizerState;
 
     get ringThickness() {
         return 10 * this.dimensions.unit;
@@ -102,20 +85,22 @@ class Visualizer implements RedomComponent {
      * @param colorName Name of the ring's theme color (random if unspecified)
      */
     addRing(colorName?: RingColor) {
+        const activeRings = this.state.activeRings;
+        const activeRingCount = activeRings.length;
         // No more than `appSettings.maxRings` rings allowed
-        if (this.state.activeRings.length >= appSettings.maxRings) return;
+        if (activeRingCount >= appSettings.maxRings) return;
         // Randomly select a color...
         colorName = sample(
             difference(
                 // ... from the list of colors
                 ringColors,
                 // ... except those which are currently active
-                this.state.activeRings.map(ring => ring.settings.colorName)
+                activeRings.map(ring => ring.settings.colorName)
             )
         )!;
 
         const ring = new Ring(colorName);
-        this.state.activeRings.push(ring);
+        activeRings.push(ring);
         return ring;
     }
 
