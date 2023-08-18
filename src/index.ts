@@ -1,8 +1,8 @@
-import './public/styles/main.scss';
-import Intro from './Intro';
+import { mount } from "redom";
+import App from "./App";
 
-document.addEventListener('DOMContentLoaded', () => {
-    const intro = new Intro();
-    intro.init();
+import "./styles/index.css";
+
+window.addEventListener("load", () => {
+    mount(document.querySelector<HTMLDivElement>("#app")!, new App());
 });
-

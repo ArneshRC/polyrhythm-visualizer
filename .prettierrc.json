@@ -1,0 +1,7 @@
+{
+    "trailingComma": "none",
+    "bracketSameLine": true,
+    "arrowParens": "avoid",
+    "tabWidth": 4,
+    "semi": true
+}
