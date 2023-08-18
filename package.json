@@ -8,7 +8,8 @@
         "build": "tsc && vite build",
         "preview": "vite preview",
         "lint": "eslint .",
-        "format": "prettier -w ."
+        "format": "prettier -w .",
+        "deploy": "gh-pages -d build"
     },
     "devDependencies": {
         "@babel/eslint-parser": "^7.22.10",
@@ -17,6 +18,7 @@
         "@typescript-eslint/parser": "^6.4.0",
         "autoprefixer": "^10.4.14",
         "eslint": "^8.47.0",
+        "gh-pages": "^6.0.0",
         "postcss": "^8.4.27",
         "postcss-import": "^15.1.0",
         "tailwindcss": "^3.3.3",
