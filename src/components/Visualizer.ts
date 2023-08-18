@@ -401,8 +401,8 @@ class Visualizer implements RedomComponent {
         const ring2 = this.addRing();
 
         // Initial beat counts
-        ring1!.beatCount = 3;
-        ring2!.beatCount = 2;
+        ring1!.beatCount = 2;
+        ring2!.beatCount = 3;
 
         // Setup handlers
         this.setupHoverHandler();
