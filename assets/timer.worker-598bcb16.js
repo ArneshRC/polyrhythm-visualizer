@@ -1,0 +1,1 @@
+(function(){"use strict";let t=null;const s=25;self.addEventListener("message",e=>{e.data=="start"?t=self.setInterval(()=>postMessage("tick"),s):e.data=="stop"&&(t!=null&&clearInterval(t),t=null)})})();
