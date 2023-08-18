@@ -35,13 +35,13 @@ class App implements RedomComponent {
     })();
 
     // Timer worker
-    timerWorker: Worker;
+    private timerWorker: Worker;
 
     // Components
-    visualizerContainer: HTMLDivElement;
-    visualizer: Visualizer;
-    ringAdder: RingAdder;
-    currentRingSettingsMenu: RingSettingsMenu | null = null;
+    private visualizerContainer: HTMLDivElement;
+    private visualizer: Visualizer;
+    private ringAdder: RingAdder;
+    private currentRingSettingsMenu: RingSettingsMenu | null = null;
 
     constructor() {
         this.visualizer = new Visualizer();
@@ -69,7 +69,7 @@ class App implements RedomComponent {
     /**
      * Close the currently open ring settings menu
      */
-    async closeRingSettingsMenu() {
+    private async closeRingSettingsMenu() {
 
         // Do nothing if no ring settings menu is open
         if (this.currentRingSettingsMenu == null) return;
@@ -80,7 +80,7 @@ class App implements RedomComponent {
 
     }
 
-    async openRingSettingsMenu(ringId: number, x: number, y: number) {
+    private async openRingSettingsMenu(ringId: number, x: number, y: number) {
 
         // Close the currently open ring settings menu first
         await this.closeRingSettingsMenu();
@@ -130,7 +130,7 @@ class App implements RedomComponent {
     /**
      * Setup the timer worker
      */
-    setupTimer() {
+    private setupTimer() {
 
         const timerWorker = new Worker(
             // Importing in this way enables vite to deal with it

@@ -5,6 +5,7 @@ import { mdiPlus } from "@mdi/js";
 import colors from "tailwindcss/colors";
 
 class RingAdder implements RedomComponent {
+    el: HTMLButtonElement; 
     private classes = new (class {
         get plus() {
             return classNames([
@@ -30,14 +31,14 @@ class RingAdder implements RedomComponent {
         }
     })();
 
-    el = el("button", new Icon(mdiPlus, colors.neutral[400]), {
-        className: this.classes.plus
-    });
-
     constructor() {
+        this.el = el("button", new Icon(mdiPlus, colors.neutral[400]), {
+            className: this.classes.plus
+        });
         this.el.addEventListener("click", () => {
             this.clickHandler();
         });
+
     }
 
     clickHandler: () => void = () => {};

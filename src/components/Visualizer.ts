@@ -22,7 +22,7 @@ class Visualizer implements RedomComponent {
     /**
      * Dimensions of the canvas
      */
-    dimensions = new (class {
+    private dimensions = new (class {
         /**
          * The canvas should be a square
          * at all times, so size is all
@@ -288,7 +288,7 @@ class Visualizer implements RedomComponent {
     /**
      * Set up the hover handler
      */
-    setupHoverHandler() {
+    private setupHoverHandler() {
 
         this.el.addEventListener("mousemove", event => {
 
@@ -338,7 +338,7 @@ class Visualizer implements RedomComponent {
 
     }
 
-    setupClickHandler() {
+    private setupClickHandler() {
         this.el.addEventListener("click", event => {
             const w = this.dimensions.width;
             const h = this.dimensions.height;
