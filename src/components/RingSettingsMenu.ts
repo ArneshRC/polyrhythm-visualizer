@@ -12,6 +12,8 @@ import {
 import { RingSettings, RingState } from "../utils/Ring";
 import Icon from "./Icon";
 import { Coords } from "../constants";
+import { EASE, Scene } from "scenejs";
+import { sleep } from "../utils";
 
 class RingSettingsMenu implements RedomComponent {
     el: HTMLDivElement;
@@ -23,10 +25,9 @@ class RingSettingsMenu implements RedomComponent {
             "text-neutral-900",
             "font-semibold",
             "flex",
-            "justify-start",
+            "justify-center",
             "items-center",
             "px-1",
-            "gap-1",
             "transition-all",
             "focus:outline-none"
         ];
@@ -151,6 +152,7 @@ class RingSettingsMenu implements RedomComponent {
                 this.beatCountInput
             ],
             {
+                id: `ring-settings-${ringId}`,
                 className: this.classes.container
             }
         );
@@ -218,9 +220,73 @@ class RingSettingsMenu implements RedomComponent {
     }
 
     /**
+     * @TODO Animate when the menu is open
+     */
+    async animateOpen() {
+        this.el.classList.add('opening');
+        new Scene({
+            [`#ring-settings-${this.ringId}`]: {
+                0: {
+                    opacity: 0,
+                    transform: {
+                        translateX: "-40%",
+                        translateY: "-40%",
+                        scale: 0.2
+                    }
+                },
+                0.2: {
+                    opacity: 1,
+                    transform: {
+                        translateX: "0%",
+                        translateY: "0%",
+                        scale: 1
+                    }
+                }
+            }
+        }, {
+            selector: true,
+            fillMode: "forwards",
+            iterationCount: 1,
+            easing: EASE
+        }).playCSS();
+        await sleep(200);
+        this.el.classList.remove('opening');
+    }
+
+    /**
      * @TODO Animate when the menu is closed
      */
-    async animateClose() {}
+    async animateClose() {
+        this.el.classList.add('closing');
+        const scene = new Scene({
+            [`#ring-settings-${this.ringId}.closing`]: {
+                0: {
+                    opacity: 1,
+                    transform: {
+                        translateX: "0%",
+                        translateY: "0%",
+                        scale: 1
+                    }
+                },
+                0.2: {
+                    opacity: 0,
+                    transform: {
+                        translateX: "-40%",
+                        translateY: "-40%",
+                        scale: 0.2
+                    }
+                }
+            }
+        }, {
+            selector: true,
+            fillMode: "forwards",
+            iterationCount: 1,
+            easing: EASE
+        }).playCSS();
+        await sleep(200);
+        this.el.classList.remove('closing');
+        scene.clear();
+    }
 
     private ringRemoveHandler: () => void = () => {};
     set onRingRemove(ringRemoveHandler: () => void) {
@@ -238,8 +304,9 @@ class RingSettingsMenu implements RedomComponent {
         this.ringReorderHandler = ringReorderHandler;
     }
 
-    onmount() {
+    async onmount() {
         this.setupHandlers();
+        await this.animateOpen();
     }
 }
 

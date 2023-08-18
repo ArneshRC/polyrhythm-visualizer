@@ -30,6 +30,7 @@
         "lodash": "^4.17.21",
         "prettier": "^3.0.2",
         "redom": "^3.29.1",
+        "scenejs": "^1.10.3",
         "sweetalert2": "^11.7.23",
         "ts-easing": "^0.2.0"
     }

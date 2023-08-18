@@ -21,10 +21,12 @@ class RingAdder implements RedomComponent {
                 "-translate-x-1/2",
                 "-translate-y-1/2",
                 "select-none",
+                "focus:outline-none",
                 "text-2xl",
                 "flex",
                 "items-center",
                 "justify-center",
+                "px-1",
                 "hover:bg-neutral-600",
                 "transition-all"
             ]);

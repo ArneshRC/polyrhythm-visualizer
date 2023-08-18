@@ -74,16 +74,17 @@ class App implements RedomComponent {
         // Do nothing if no ring settings menu is open
         if (this.currentRingSettingsMenu == null) return;
 
-        await this.currentRingSettingsMenu.animateClose();
-        unmount(this.visualizerContainer, this.currentRingSettingsMenu);
+        const prevRingSettingsMenu = this.currentRingSettingsMenu;
         this.currentRingSettingsMenu = null;
+        await prevRingSettingsMenu.animateClose();
+        unmount(this.visualizerContainer, prevRingSettingsMenu);
 
     }
 
     private async openRingSettingsMenu(ringId: number, x: number, y: number) {
 
         // Close the currently open ring settings menu first
-        await this.closeRingSettingsMenu();
+        this.closeRingSettingsMenu();
 
         const activeRings = this.visualizer.state.activeRings;
         const ringIdx = findIndex(activeRings, { id: ringId });
