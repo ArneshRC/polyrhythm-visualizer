@@ -2,7 +2,8 @@ import { RedomComponent, el, mount, setChildren, text, unmount } from "redom";
 import classNames from "classnames";
 import { findIndex } from "lodash";
 
-import { appSettings, audioContext } from "./services/global";
+import { appSettings } from "./state";
+import { audioContext } from "./audio";
 import Visualizer from "./components/Visualizer";
 import RingAdder from "./components/RingAdder";
 import RingSettingsMenu from "./components/RingSettingsMenu";

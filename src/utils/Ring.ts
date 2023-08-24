@@ -1,7 +1,7 @@
 import colors from "tailwindcss/colors";
 
 import { Instrument, Kick, Sine, Snare } from "./Instrument";
-import BeatScheduler from "../services/BeatScheduler";
+import BeatScheduler from "../utils/BeatScheduler";
 import { InstrumentName, RingColor } from "../constants";
 
 interface RingState {
