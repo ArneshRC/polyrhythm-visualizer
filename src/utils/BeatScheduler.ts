@@ -1,5 +1,6 @@
 import { RingSettings, RingState } from "../utils/Ring";
-import { appSettings, audioContext } from "./global";
+import { audioContext } from "../audio";
+import { appSettings } from "../state";
 
 interface BeatQueueItem {
     beatNumber: number;

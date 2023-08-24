@@ -22,9 +22,4 @@ const visualizerState: VisualizerState = {
     }
 };
 
-/**
- * Global audio context
- */
-const audioContext = new AudioContext();
-
-export { appSettings, audioContext, visualizerState };
+export { appSettings, visualizerState };
