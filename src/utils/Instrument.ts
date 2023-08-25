@@ -85,6 +85,14 @@ export class Sine extends Instrument {
 
         oscillator.frequency.setValueAtTime(220, time);
 
+        // A bare 220Hz sine at full gain reads much louder than the kick
+        // (whose tone drops out of the audible range almost at once) or
+        // the snare (whose body decays in 100ms), and hard-stopping it
+        // clicks. So give it an attack and a decay of its own.
+        oscillatorEnvelope.gain.setValueAtTime(0.001, time);
+        oscillatorEnvelope.gain.exponentialRampToValueAtTime(0.3, time + 0.01);
+        oscillatorEnvelope.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+
         oscillator.start(time);
         oscillator.stop(time + 0.2);
     }
