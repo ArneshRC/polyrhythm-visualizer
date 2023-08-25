@@ -6,6 +6,7 @@ import { type RingColor, ringColors } from "../constants";
 import { appSettings, visualizerState } from "../state";
 import { audioContext } from "../audio";
 import Canvas2DRenderer from "../renderers/Canvas2DRenderer";
+import WebGLRenderer from "../renderers/WebGLRenderer";
 import type { BeaterFrame, Renderer, RingFrame } from "../renderers/Renderer";
 import type VisualizerState from "../state/VisualizerState";
 import Ring from "../utils/Ring";
@@ -96,6 +97,45 @@ class Visualizer implements RedomComponent {
                 this.resize();
             }
         });
+    }
+
+    /**
+     * Swap the rendering backend. A canvas can only ever have
+     * one kind of context, so the canvas gets replaced too.
+     *
+     * @param useWebGL Whether to draw with WebGL
+     * @returns Whether the requested backend is now in use
+     */
+    setBackend(useWebGL: boolean) {
+        const renderer = useWebGL
+            ? WebGLRenderer.create(this.dimensions.size)
+            : new Canvas2DRenderer(this.dimensions.size);
+
+        // The browser wouldn't hand over a WebGL context
+        if (renderer == null) return false;
+
+        if (renderer instanceof WebGLRenderer)
+            // Don't leave a dead canvas on screen
+            renderer.onContextLost = () => {
+                this.setBackend(false);
+                this.backendFallbackHandler();
+            };
+
+        const previous = this.renderer;
+        this.el.replaceChild(renderer.el, previous.el);
+        this.renderer = renderer;
+        previous.dispose();
+
+        return true;
+    }
+
+    private backendFallbackHandler: () => void = () => {};
+    /**
+     * Called when the visualizer drops back to Canvas 2D
+     * on its own, so the UI can catch up
+     */
+    set onBackendFallback(backendFallbackHandler: () => void) {
+        this.backendFallbackHandler = backendFallbackHandler;
     }
 
     /**
