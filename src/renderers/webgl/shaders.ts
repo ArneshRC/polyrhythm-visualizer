@@ -92,12 +92,12 @@ const sdfFragmentShader = /* glsl */ `
             ? abs(distanceFromCenter - uRadius) - uBand
             : distanceFromCenter - uRadius;
 
+        // A glow spreads over uGlow pixels, so it is at half
+        // strength on the edge of the band, the way a blurred
+        // copy of the band would be. Without one, the feather
+        // is a single pixel of antialiasing.
         float feather = uGlow > 0.0 ? uGlow : 1.0;
         float alpha = 1.0 - smoothstep(-feather, feather, distanceOutside);
-
-        // Bias the falloff so a glow reads like a blur
-        // rather than a fat second ring
-        if (uGlow > 0.0) alpha *= alpha;
 
         gl_FragColor = premultiplied(uColor.rgb, alpha * uColor.a);
     }
