@@ -7,6 +7,7 @@ import { audioContext } from "./audio";
 import Visualizer from "./components/Visualizer";
 import RingAdder from "./components/RingAdder";
 import RingSettingsMenu from "./components/RingSettingsMenu";
+import BackendToggle from "./components/BackendToggle";
 import { swap } from "./utils";
 import { EASE_IN_OUT, Scene } from "scenejs";
 
@@ -52,11 +53,13 @@ class App implements RedomComponent {
     private visualizerContainer: HTMLDivElement;
     private visualizer: Visualizer;
     private ringAdder: RingAdder;
+    private backendToggle: BackendToggle;
     private currentRingSettingsMenu: RingSettingsMenu | null = null;
 
     constructor() {
         this.visualizer = new Visualizer();
         this.ringAdder = new RingAdder();
+        this.backendToggle = new BackendToggle(appSettings.useWebGL);
 
         // Contains visualizer and ring adder
         this.visualizerContainer = el(
@@ -83,7 +86,8 @@ class App implements RedomComponent {
                         className: this.classes.description
                     }
                 )),
-                this.visualizerContainer
+                this.visualizerContainer,
+                this.backendToggle
             ],
             { className: this.classes.container }
         );
@@ -209,6 +213,23 @@ class App implements RedomComponent {
             }
         };
 
+        // When the WebGL switch is flipped
+        this.backendToggle.onChange = useWebGL => {
+            // Stay on the 2D canvas if WebGL isn't available
+            if (!this.visualizer.setBackend(useWebGL)) {
+                this.backendToggle.checked = false;
+                useWebGL = false;
+            }
+            appSettings.useWebGL = useWebGL;
+        };
+
+        // The visualizer drops back to the 2D canvas
+        // on its own if the WebGL context is lost
+        this.visualizer.onBackendFallback = () => {
+            this.backendToggle.checked = false;
+            appSettings.useWebGL = false;
+        };
+
         // When a ring is clicked
         this.visualizer.onRingClick = (idx, x, y) => {
             // Get its id
@@ -291,6 +312,14 @@ class App implements RedomComponent {
                     }
                 },
                 "#ring-adder": {
+                    0.5: {
+                        opacity: 0
+                    },
+                    1: {
+                        opacity: 1
+                    }
+                },
+                "#webgl-toggle": {
                     0.5: {
                         opacity: 0
                     },

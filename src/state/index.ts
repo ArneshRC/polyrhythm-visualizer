@@ -6,7 +6,8 @@ import VisualizerState from "./VisualizerState";
  */
 const appSettings: AppSettings = {
     measureDuration: 2,
-    maxRings: 5
+    maxRings: 5,
+    useWebGL: false
 };
 
 /**

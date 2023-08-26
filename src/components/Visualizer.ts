@@ -81,6 +81,10 @@ class Visualizer implements RedomComponent {
             }
         });
 
+        // Honour the configured default, dropping back to
+        // the 2D canvas if WebGL isn't available
+        if (appSettings.useWebGL) appSettings.useWebGL = this.setBackend(true);
+
         this.setupHandlers();
     }
 
