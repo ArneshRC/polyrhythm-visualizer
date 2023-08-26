@@ -10,6 +10,7 @@ import WebGLRenderer from "../renderers/WebGLRenderer";
 import type { BeaterFrame, Renderer, RingFrame } from "../renderers/Renderer";
 import type VisualizerState from "../state/VisualizerState";
 import Ring from "../utils/Ring";
+import { getDigitAnimation } from "../utils/beatAnimation";
 
 class Visualizer implements RedomComponent {
     /**
@@ -217,6 +218,13 @@ class Visualizer implements RedomComponent {
         const beatCount = ring.beatCount;
         const beaters: BeaterFrame[] = [];
 
+        // How the beat number should be popping in or fading
+        // out, going by how long ago its beat landed
+        const digitAnimation = getDigitAnimation(
+            audioContext.currentTime - ring.scheduler.currentBeatTime,
+            appSettings.measureDuration / beatCount
+        );
+
         // Place the beaters at equally spaced intervals
         for (let i = 0; i < beatCount; i++) {
             // Angle of the beater w.r.t. center
@@ -244,8 +252,8 @@ class Visualizer implements RedomComponent {
                           value: i + 1,
                           color: colors[ring.settings.colorName][900],
                           size: this.beatNumberSize,
-                          scale: 1,
-                          alpha: 1
+                          scale: digitAnimation.scale,
+                          alpha: digitAnimation.alpha
                       }
                     : undefined
             });
