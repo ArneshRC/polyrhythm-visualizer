@@ -243,9 +243,11 @@ class Visualizer implements RedomComponent {
             beaters.push({
                 x,
                 y,
-                // The beat being played gets a
-                // bigger radius, for emphasis
-                radius: (active ? 10 : 5) * this.dimensions.unit,
+                // The beat being played swells, for emphasis,
+                // riding the same curve as its number
+                radius:
+                    (active ? 5 * (1 + digitAnimation.scale) : 5) *
+                    this.dimensions.unit,
                 color: colors[ring.settings.colorName][200],
                 digit: active
                     ? {
